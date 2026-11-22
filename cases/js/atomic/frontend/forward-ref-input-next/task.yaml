@@ -1,0 +1,35 @@
+id: "frontend-forward-ref-input-next"
+title: "Forwarding Refs (React.forwardRef)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "forwardRef"
+  - "refs"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"parent-focus-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"fancy-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "forwardRef"
+  - contains:
+      file: "app/page.jsx"
+      text: "FancyInput"

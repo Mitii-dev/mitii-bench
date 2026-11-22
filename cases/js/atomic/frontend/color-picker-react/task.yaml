@@ -1,0 +1,41 @@
+id: "frontend-color-picker-react"
+title: "Color Picker Widget"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "color"
+  - "picker"
+  - "hex"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "swatch-"
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"hex-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"color-preview\""
+  - contains:
+      file: "src/App.jsx"
+      text: "#ff0000"
+  - contains:
+      file: "src/App.jsx"
+      text: "hex-input"
+  - contains:
+      file: "src/App.jsx"
+      text: "color-preview"

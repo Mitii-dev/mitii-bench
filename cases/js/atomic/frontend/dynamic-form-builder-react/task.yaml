@@ -1,0 +1,38 @@
+id: "frontend-dynamic-form-builder-react"
+title: "Dynamic Form Field Builder"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "form-builder"
+  - "dynamic"
+  - "fields"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"add-field-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "custom-field-"
+  - contains:
+      file: "src/App.jsx"
+      text: "Text"
+  - contains:
+      file: "src/App.jsx"
+      text: "Number"
+  - contains:
+      file: "src/App.jsx"
+      text: "Remove"

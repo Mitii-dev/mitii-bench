@@ -1,0 +1,41 @@
+id: "frontend-polling-status-next"
+title: "Polling Dashboard Widget"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "polling"
+  - "status"
+  - "interval"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"server-status\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"pause-polling-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Healthy"
+  - contains:
+      file: "app/page.jsx"
+      text: "Unreachable"
+  - contains:
+      file: "app/page.jsx"
+      text: "5000"
+  - contains:
+      file: "app/page.jsx"
+      text: "pause"

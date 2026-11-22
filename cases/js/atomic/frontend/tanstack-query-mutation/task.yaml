@@ -1,0 +1,36 @@
+id: "frontend-tanstack-query-mutation"
+title: "TanStack Query: useMutation with Optimistic Updates"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "tanstack-query"
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "tanstack-query"
+  - "data-fetching"
+  - "mutation"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"comment-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"comment-submit\""
+  - contains:
+      file: "src/App.jsx"
+      text: "@tanstack/react-query"
+  - contains:
+      file: "src/App.jsx"
+      text: "useMutation"
+  - contains:
+      file: "src/App.jsx"
+      text: "onMutate"

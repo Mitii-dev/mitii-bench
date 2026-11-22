@@ -1,0 +1,38 @@
+id: "frontend-credit-card-visual-next"
+title: "Virtual Credit Card Visualizer"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "credit-card"
+  - "form"
+  - "visual"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"visual-card\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Card Number"
+  - contains:
+      file: "app/page.jsx"
+      text: "Expiry"
+  - contains:
+      file: "app/page.jsx"
+      text: "CVV"
+  - contains:
+      file: "app/page.jsx"
+      text: "visual-card"

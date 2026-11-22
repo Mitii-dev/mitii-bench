@@ -4,43 +4,40 @@ Source prompts live in gitignored `references/react-tasks.md` (100 items).
 Generator: `pnpm generate:react-frontend` → `scripts/generate-react-frontend-cases.mjs`  
 Data: `scripts/data/react-{core,realworld,library}-cases.mjs`
 
-## Applicability matrix
+## Applicability
 
-| Prompt range | Topic | React (`base-react-js`) | Next (`base-next-js`) | Notes |
+| Prompt range | Topic | React case | Next case | Notes |
 |---|---|---|---|---|
-| 1–25 | React core | Yes + dry-run solutions | Yes (client `"use client"`) | Vanilla only |
-| 26–30, 32 | UI libs (MUI/Chakra/antd/Radix/Headless) | Scaffold (`packages` tagged) | No | Needs npm packages; no dry-run solution yet |
-| 31 | React Native Paper | **Skipped** | **Skipped** | Not a web fixture |
-| 33–36 | React Router | Scaffold (`react-router`) | Parallel Next-native cases | `next-basic-nav`, `next-dynamic-params`, `next-protected-route`, `next-search-params` have solutions |
-| 37–55 | Redux/Zustand/Query/RHF/etc. | Scaffold (`ecosystem-lib`) | No | Agent must install packages |
-| 56–99 | Real-world UI widgets | Yes + dry-run solutions | Yes | Vanilla |
-| 100 | BenchApp site shell | Yes | Yes | Existing `frontend-site-nav-pages` |
+| 1–25 | React core | `{slug}-react` | `{slug}-next` | Vanilla |
+| 26–30, 32 | UI libs | Scaffold | No | `ecosystem-lib` |
+| 31 | React Native Paper | Skipped | Skipped | Not a web starter |
+| 33–36 | React Router | Scaffold | Parallel `next-*` cases | |
+| 37–55 | Redux/Zustand/Query/… | Scaffold | No | Agent installs packages |
+| 56–99 | Real-world widgets | `{slug}-react` | `{slug}-next` | Vanilla |
+| 100 | Site shell | `site-nav-pages-react` | `site-nav-pages-next` | |
 
 ## Tags
 
 - `vanilla` — no extra packages; dry-run solutions shipped
-- `ecosystem-lib` — requires third-party packages; scaffold only
+- `ecosystem-lib` — third-party packages; scaffold only
 - `smoke` — CI dry-run subset
-- `react-tasks` — imported from the reference bank
+- `react-tasks` — from the reference bank
 
-## Grading strength
+## Check strength
 
-Vanilla cases use **three layers**:
+1. `contains` / `exists` — structural contracts
+2. `build: true`
+3. `test:` — Vitest + Testing Library under `tests/`
 
-1. `contains` / `exists` — structural source contracts (`data-testid`, markers)
-2. `build: true` — `npm run build`
-3. `ui_oracle` — Vitest + Testing Library behavioral tests (agent-hidden)
-
-See [UI_ORACLES.md](./UI_ORACLES.md).
+See [CHECKS.md](./CHECKS.md).
 
 ## Commands
 
 ```bash
-pnpm generate:react-frontend --force          # regenerate all
-pnpm generate:react-frontend --vanilla-only   # core + real-world only
+pnpm generate:react-frontend --force
+pnpm generate:react-frontend --vanilla-only
 pnpm case:validate
 pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke
-pnpm case:dry-run frontend-counter-state     # one case, all bases
+pnpm case:dry-run frontend-counter-state-react
 pnpm cases --tag=vanilla --family=frontend
-pnpm cases --tag=ecosystem-lib
 ```

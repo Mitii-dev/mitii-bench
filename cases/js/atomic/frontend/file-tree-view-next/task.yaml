@@ -1,0 +1,32 @@
+id: "frontend-file-tree-view-next"
+title: "Tree View / Hierarchical Directory File Explorer"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "tree"
+  - "files"
+  - "folders"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "folder-"
+  - contains:
+      file: "app/page.jsx"
+      text: "file-"
+  - contains:
+      file: "app/page.jsx"
+      text: "onClick"

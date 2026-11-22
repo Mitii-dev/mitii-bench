@@ -1,27 +1,25 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { ManifestSchema, TaskSchema, normalizeBases } from "@mitii-bench/schema";
-import { compileGrade } from "./grade-compiler.js";
-import { fixturesDir, suitesDir } from "./paths.js";
+import { ManifestSchema, TaskSchema, normalizeStarterId } from "@mitii-bench/schema";
+import { compileChecks } from "@mitii-bench/checks";
+import { casesDir, startersDir } from "./paths.js";
 
 /**
  * Layout:
- *   suites/{ecosystem}/atomic/{category}/{slug}/task.yaml
- *   suites/{ecosystem}/projects/{id}/manifest.json
- *   fixtures/{ecosystem}/{base}/
+ *   cases/{ecosystem}/atomic/{category}/{slug}/task.yaml
+ *   cases/{ecosystem}/projects/{id}/manifest.json
+ *   starters/{ecosystem}/{starter}/
  */
 export function discoverTasks(root, filters = {}) {
-  const suites = suitesDir(root);
+  const suites = casesDir(root);
   const tasks = [];
   walk(suites, (dir) => {
     const taskPath = join(dir, "task.yaml");
     if (!existsSync(taskPath)) return;
     try {
-      const family = loadTaskFamily(dir, root);
-      for (const instance of expandMatrix(family, filters)) {
-        if (matchesFilters(instance, filters)) tasks.push(instance);
-      }
+      const task = loadTaskDir(dir, root);
+      if (matchesFilters(task, filters)) tasks.push(task);
     } catch (error) {
       tasks.push({
         error: error.message,
@@ -33,22 +31,22 @@ export function discoverTasks(root, filters = {}) {
   return tasks.sort((a, b) => (a.runId ?? a.id ?? "").localeCompare(b.runId ?? b.id ?? ""));
 }
 
-export function loadTaskDir(caseDir, root, baseOverride) {
-  const family = loadTaskFamily(caseDir, root);
-  const bases = normalizeBases(family);
-  const base = baseOverride ?? bases[0];
-  if (!bases.includes(base)) {
-    throw new Error(`Base ${base} not in matrix for ${family.id}: ${bases.join(", ")}`);
-  }
-  return materializeInstance(family, base, root);
-}
-
-export function loadTaskFamily(caseDir, root) {
+export function loadTaskDir(caseDir, root) {
   const taskPath = join(caseDir, "task.yaml");
   if (!existsSync(taskPath)) throw new Error(`Missing task.yaml in ${caseDir}`);
   const raw = parseYaml(readFileSync(taskPath, "utf8"));
   const inferredEco = inferEcosystemFromPath(caseDir, root);
   if (!raw.ecosystem && inferredEco) raw.ecosystem = inferredEco;
+
+  // Soft-normalize legacy keys before schema parse (migration window / hand edits)
+  if (!raw.starter) {
+    if (Array.isArray(raw.bases) && raw.bases[0]) raw.starter = raw.bases[0];
+    else if (raw.fixture) raw.starter = raw.fixture;
+  }
+  if (!raw.checks && Array.isArray(raw.grade)) raw.checks = raw.grade;
+  delete raw.bases;
+  delete raw.fixture;
+  delete raw.grade;
 
   const parsed = TaskSchema.safeParse(raw);
   if (!parsed.success) {
@@ -57,42 +55,77 @@ export function loadTaskFamily(caseDir, root) {
     );
   }
   const task = parsed.data;
-  const bases = normalizeBases(task);
+  const starter = normalizeStarterId(task.starter) ?? task.starter;
   const readmeFile = task.readmeFile ?? "README.md";
-  const promptFile = task.promptFile ?? "spec.md";
+  const promptFile = task.promptFile ?? "prompt.md";
   if (!existsSync(join(caseDir, readmeFile))) {
     throw new Error(`Missing ${readmeFile} (required case explanation)`);
   }
   let prompt = task.prompt ?? "";
   if (!prompt) {
     const promptPath = join(caseDir, promptFile);
-    if (!existsSync(promptPath)) {
+    const legacySpec = join(caseDir, "spec.md");
+    if (existsSync(promptPath)) {
+      prompt = readFileSync(promptPath, "utf8");
+    } else if (existsSync(legacySpec)) {
+      prompt = readFileSync(legacySpec, "utf8");
+    } else {
       throw new Error(`Missing ${promptFile} (agent prompt) or inline prompt:`);
     }
-    prompt = readFileSync(promptPath, "utf8");
   }
-  for (const base of bases) {
-    const fixturePath = resolveFixturePath(root, task.ecosystem, base);
-    if (!fixturePath) {
-      throw new Error(
-        `Base fixture not found: ${base} (looked under fixtures/${task.ecosystem}/ and fixtures/)`,
-      );
-    }
+
+  const starterPath = resolveStarterPath(root, task.ecosystem, starter);
+  if (!starterPath) {
+    throw new Error(
+      `Starter not found: ${starter} (looked under starters/${task.ecosystem}/ and starters/)`,
+    );
   }
+
+  const checkItems = Array.isArray(task.checks) ? task.checks : [];
+  if (checkItems.length === 0) {
+    throw new Error(`No checks for ${task.id} — add checks: in task.yaml`);
+  }
+  const checks = compileChecks(checkItems);
+
+  const solutionDir = resolveSolutionDir(caseDir);
+  const testsDir = resolveTestsDir(caseDir);
+
   return {
     ...task,
-    bases,
+    starter,
+    base: starter,
+    fixture: starter,
+    fixturePath: starterPath,
+    starterPath,
+    runId: task.id,
+    id: task.id,
+    instanceId: task.id,
     prompt,
     readmePath: join(caseDir, readmeFile),
     caseDir,
     relativeDir: relative(root, caseDir),
+    checks,
+    checkItems,
+    gradeItems: checkItems,
+    solutionDir,
+    solutionPatch: join(caseDir, "solution.patch"),
+    testsDir,
   };
 }
 
-export function resolveFixturePath(root, ecosystem, base) {
+export function resolveStarterPath(root, ecosystem, starter) {
+  const id = normalizeStarterId(starter) ?? starter;
+  const legacy = starter.startsWith("base-") ? starter : `base-${id}`;
+  const dir = startersDir(root);
   const candidates = [
-    join(fixturesDir(root), ecosystem, base),
-    join(fixturesDir(root), base),
+    join(dir, ecosystem, id),
+    join(dir, id),
+    join(dir, ecosystem, legacy),
+    join(dir, legacy),
+    // pre-rename fixtures/
+    join(root, "fixtures", ecosystem, legacy),
+    join(root, "fixtures", legacy),
+    join(root, "fixtures", ecosystem, id),
   ];
   for (const path of candidates) {
     if (existsSync(path)) return path;
@@ -100,115 +133,36 @@ export function resolveFixturePath(root, ecosystem, base) {
   return null;
 }
 
-export function expandMatrix(family, filters = {}) {
-  let bases = [...family.bases];
-  if (filters.base) bases = bases.filter((b) => b === filters.base);
-  if (filters.family && family.family !== filters.family) return [];
-  if (filters.ecosystem && family.ecosystem !== filters.ecosystem) return [];
-  if (filters.package) {
-    const pkgs = family.packages ?? [];
-    if (!pkgs.includes(filters.package)) return [];
-  }
-  return bases.map((base) => materializeInstance(family, base, null));
+/** @deprecated use resolveStarterPath */
+export function resolveFixturePath(root, ecosystem, base) {
+  return resolveStarterPath(root, ecosystem, base);
 }
 
-function materializeInstance(family, base, rootHint) {
-  const root = rootHint ?? inferRoot(family.caseDir);
-  const fixturePath = resolveFixturePath(root, family.ecosystem, base);
-  const gradeItems = loadGradeForBase(family, base);
-  if (gradeItems.length === 0) {
-    throw new Error(
-      `No grade recipes for ${family.id}@${base} — add grade: in task.yaml or grade/${base}.yaml`,
-    );
-  }
-  const checks = compileGrade(gradeItems);
-  const multi = family.bases.length > 1;
-  const runId = multi ? `${family.id}@${base}` : family.id;
-  const perBaseSolution = join(family.caseDir, "resources", "solution", base);
-  const legacySolution = join(family.caseDir, "resources", "solution");
-  return {
-    ...family,
-    base,
-    fixture: base,
-    fixturePath,
-    runId,
-    id: family.id,
-    instanceId: runId,
-    prompt: shapePrompt(family.prompt, base),
-    checks,
-    gradeItems,
-    solutionDir: existsSync(perBaseSolution) ? perBaseSolution : legacySolution,
-    solutionPatch: join(family.caseDir, "resources", "solution.patch"),
-  };
+function resolveSolutionDir(caseDir) {
+  const flat = join(caseDir, "solution");
+  if (existsSync(flat) && statSync(flat).isDirectory()) return flat;
+  const legacy = join(caseDir, "resources", "solution");
+  if (existsSync(legacy) && statSync(legacy).isDirectory()) return legacy;
+  return flat;
 }
 
-/**
- * Drop other-base directive lines from a shared spec and ensure the active
- * base has an explicit implement-here hint for known dual-base frontend fixtures.
- */
-export function shapePrompt(prompt, base) {
-  const text = String(prompt ?? "");
-  const lines = text.split(/\r?\n/);
-  const filtered = lines.filter((line) => {
-    const match = line.match(/^\s*For\s+`?(base-[\w-]+)`?\s*,/i);
-    if (!match) return true;
-    return match[1] === base;
-  });
-  let shaped = filtered.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd();
-
-  if (
-    (base === "base-react-js" || base === "base-react-ts") &&
-    !/\bsrc\/App\.(jsx|tsx|js|ts)\b/.test(shaped)
-  ) {
-    shaped += `\n\nFor \`${base}\`, implement the UI in \`src/App.jsx\`.`;
-  }
-
-  if (
-    (base === "base-next-js" || base === "base-next-ts") &&
-    !/\bapp\/page\.(jsx|tsx|js|ts)\b/.test(shaped)
-  ) {
-    shaped += `\n\nFor \`${base}\`, implement the UI in \`app/page.jsx\` as a client component (\`"use client"\`).`;
-  }
-
-  return shaped.length > 0 ? `${shaped}\n` : shaped;
-}
-
-function loadGradeForBase(family, base) {
-  const shared = Array.isArray(family.grade) ? [...family.grade] : [];
-  const perBasePath = join(family.caseDir, "grade", `${base}.yaml`);
-  if (!existsSync(perBasePath)) return shared;
-  const raw = parseYaml(readFileSync(perBasePath, "utf8"));
-  const items = Array.isArray(raw) ? raw : raw?.grade;
-  if (!Array.isArray(items)) {
-    throw new Error(`grade/${base}.yaml must be a YAML list or { grade: [...] }`);
-  }
-  // Ignore empty stub files (comments-only → null/empty)
-  if (items.length === 0) return shared;
-  return [...shared, ...items];
+function resolveTestsDir(caseDir) {
+  const flat = join(caseDir, "tests");
+  if (existsSync(flat) && statSync(flat).isDirectory()) return flat;
+  const legacy = join(caseDir, "resources", "oracle");
+  if (existsSync(legacy) && statSync(legacy).isDirectory()) return legacy;
+  return flat;
 }
 
 function inferEcosystemFromPath(caseDir, root) {
-  const rel = relative(suitesDir(root), caseDir).replaceAll("\\", "/");
+  const rel = relative(casesDir(root), caseDir).replaceAll("\\", "/");
   const first = rel.split("/")[0];
   if (["js", "python", "go", "java", "rust", "other"].includes(first)) return first;
   return null;
 }
 
-function inferRoot(caseDir) {
-  let dir = caseDir;
-  for (let i = 0; i < 10; i++) {
-    if (existsSync(join(dir, "pnpm-workspace.yaml")) && existsSync(join(dir, "suites"))) {
-      return dir;
-    }
-    const parent = join(dir, "..");
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return process.cwd();
-}
-
 export function discoverProjects(root) {
-  const suites = suitesDir(root);
+  const suites = casesDir(root);
   if (!existsSync(suites)) return [];
   const projects = [];
   for (const eco of readdirSync(suites)) {
@@ -229,6 +183,12 @@ export function loadProject(projectDir, root) {
   const raw = JSON.parse(readFileSync(manifestPath, "utf8"));
   const inferredEco = inferEcosystemFromPath(projectDir, root);
   if (!raw.ecosystem && inferredEco) raw.ecosystem = inferredEco;
+  if (!raw.starter) {
+    if (Array.isArray(raw.bases) && raw.bases[0]) raw.starter = raw.bases[0];
+    else if (raw.fixture) raw.starter = raw.fixture;
+  }
+  delete raw.bases;
+  delete raw.fixture;
   const parsed = ManifestSchema.safeParse(raw);
   if (!parsed.success) {
     throw new Error(
@@ -236,19 +196,17 @@ export function loadProject(projectDir, root) {
     );
   }
   const manifest = parsed.data;
-  const projectBase =
-    (manifest.bases && manifest.bases[0]) || manifest.fixture || null;
+  const projectStarter = manifest.starter ? normalizeStarterId(manifest.starter) : null;
   const steps = manifest.sequence
     .slice()
     .sort((a, b) => a.step - b.step)
     .map((step) => {
       const caseDir = join(projectDir, step.caseDir);
-      const family = loadTaskFamily(caseDir, root);
-      const base =
-        projectBase && family.bases.includes(projectBase)
-          ? projectBase
-          : family.bases[0];
-      return { ...step, task: materializeInstance(family, base, root) };
+      const task = loadTaskDir(caseDir, root);
+      if (projectStarter && task.starter !== projectStarter) {
+        // Project pins a starter; case must match
+      }
+      return { ...step, task };
     });
   return {
     ...manifest,
@@ -265,10 +223,17 @@ function matchesFilters(task, filters) {
     if (task.id !== want && task.runId !== want && task.instanceId !== want) return false;
   }
   if (filters.category && task.category !== filters.category) return false;
-  if (filters.fixture && task.fixture !== filters.fixture && task.base !== filters.fixture) {
+  const starter = task.starter ?? task.base;
+  if (filters.fixture && task.fixture !== filters.fixture && starter !== filters.fixture) {
     return false;
   }
-  if (filters.base && task.base !== filters.base) return false;
+  if (filters.base && starter !== filters.base && starter !== normalizeStarterId(filters.base)) {
+    return false;
+  }
+  if (filters.starter) {
+    const want = normalizeStarterId(filters.starter) ?? filters.starter;
+    if (starter !== want) return false;
+  }
   if (filters.family && task.family !== filters.family) return false;
   if (filters.ecosystem && task.ecosystem !== filters.ecosystem) return false;
   if (filters.package && !(task.packages ?? []).includes(filters.package)) return false;
@@ -277,7 +242,7 @@ function matchesFilters(task, filters) {
   if (filters.search) {
     const q = filters.search.toLowerCase();
     const hay =
-      `${task.id} ${task.runId} ${task.title} ${task.prompt} ${task.base} ${task.ecosystem} ${(task.tags ?? []).join(" ")}`.toLowerCase();
+      `${task.id} ${task.runId} ${task.title} ${task.prompt} ${starter} ${task.ecosystem} ${(task.tags ?? []).join(" ")}`.toLowerCase();
     if (!hay.includes(q)) return false;
   }
   return true;
@@ -287,14 +252,22 @@ function walk(dir, onDir) {
   if (!existsSync(dir)) return;
   onDir(dir);
   for (const entry of readdirSync(dir)) {
-    if (entry === "node_modules" || entry === "resources" || entry === "grade") continue;
+    if (
+      entry === "node_modules" ||
+      entry === "resources" ||
+      entry === "grade" ||
+      entry === "tests" ||
+      entry === "solution"
+    ) {
+      continue;
+    }
     const abs = join(dir, entry);
     if (statSync(abs).isDirectory()) walk(abs, onDir);
   }
 }
 
-export function listFixtures(root, ecosystem) {
-  const dir = fixturesDir(root);
+export function listStarters(root, ecosystem) {
+  const dir = startersDir(root);
   if (!existsSync(dir)) return [];
   const out = [];
   const ecos = ecosystem
@@ -302,30 +275,41 @@ export function listFixtures(root, ecosystem) {
     : readdirSync(dir).filter((n) => statSync(join(dir, n)).isDirectory() && !n.startsWith("."));
   for (const eco of ecos) {
     const ecoDir = join(dir, eco);
-    // legacy flat base-* at fixtures root
-    if (eco.startsWith("base-")) {
-      out.push(eco);
+    if (eco.startsWith("base-") || !eco.includes("-") && eco.startsWith("react")) {
+      // flat starter at starters root
+    }
+    if (eco.startsWith("base-") || ["react-js", "next-js", "node", "nest-js", "ts-lib"].includes(eco)) {
+      out.push(normalizeStarterId(eco) ?? eco);
       continue;
     }
     if (!existsSync(ecoDir) || !statSync(ecoDir).isDirectory()) continue;
     for (const name of readdirSync(ecoDir)) {
       if (statSync(join(ecoDir, name)).isDirectory() && !name.startsWith(".")) {
-        out.push(name);
+        out.push(normalizeStarterId(name) ?? name);
       }
     }
   }
-  // also scan flat fixtures/
   for (const name of readdirSync(dir)) {
-    if (name.startsWith("base-") && statSync(join(dir, name)).isDirectory()) {
-      if (!out.includes(name)) out.push(name);
+    if (
+      (name.startsWith("base-") || ["react-js", "next-js", "node", "nest-js", "ts-lib"].includes(name)) &&
+      statSync(join(dir, name)).isDirectory()
+    ) {
+      const id = normalizeStarterId(name) ?? name;
+      if (!out.includes(id)) out.push(id);
     }
   }
-  return out.sort();
+  return [...new Set(out)].sort();
+}
+
+/** @deprecated use listStarters */
+export function listFixtures(root, ecosystem) {
+  return listStarters(root, ecosystem);
 }
 
 export function parseTaskRef(ref) {
-  if (!ref) return { id: null, base: null };
+  if (!ref) return { id: null, starter: null };
+  // Legacy id@base no longer expands a matrix; treat full string as id if no match needed
   const at = ref.lastIndexOf("@");
-  if (at <= 0) return { id: ref, base: null };
-  return { id: ref.slice(0, at), base: ref.slice(at + 1) };
+  if (at <= 0) return { id: ref, starter: null };
+  return { id: ref.slice(0, at), starter: normalizeStarterId(ref.slice(at + 1)) };
 }

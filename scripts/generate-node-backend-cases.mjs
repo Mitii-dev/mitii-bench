@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
- * Materialize references/node-tasks.md into suites/js/atomic/backend/* cases
- * with solutions, api_oracle tests, HTTP payload grades, and package_deps.
+ * Materialize references/node-tasks.md into cases/js/atomic/backend/* .
  */
 import { mkdirSync, writeFileSync, existsSync, rmSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -12,13 +11,18 @@ import { nodeRealworldCases } from "./data/node-realworld-cases.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const backendRoot = join(root, "suites", "js", "atomic", "backend");
+const backendRoot = join(root, "cases", "js", "atomic", "backend");
 const REF = join(root, "references", "node-tasks.md");
 
 const FORCE = process.argv.includes("--force");
 const CORE_ONLY = process.argv.includes("--core-only");
 const ECO_ONLY = process.argv.includes("--eco-only");
 const REAL_ONLY = process.argv.includes("--realworld-only");
+
+const STARTER_MAP = {
+  "base-node": "node",
+  "base-nest-js": "nest-js",
+};
 
 function yamlQuote(s) {
   return JSON.stringify(s);
@@ -41,23 +45,6 @@ function parsePrompts(md) {
   return map;
 }
 
-function gradeYaml(file, markers) {
-  const lines = [];
-  const seen = new Set();
-  for (const m of markers ?? []) {
-    if (seen.has(m)) continue;
-    seen.add(m);
-    lines.push("- contains:");
-    lines.push(`    file: ${file}`);
-    lines.push(`    text: ${yamlQuote(m)}`);
-  }
-  return lines.length ? `${lines.join("\n")}\n` : "";
-}
-
-function httpGradeYaml(httpGrade) {
-  return `- http: ${JSON.stringify(httpGrade)}\n`;
-}
-
 function writeCaseDir(caseDir, files) {
   if (existsSync(caseDir)) {
     if (!FORCE) {
@@ -78,19 +65,20 @@ function writeCaseDir(caseDir, files) {
 function materialize(c, promptFromRef) {
   const id = `backend-${c.slug}`;
   const caseDir = join(backendRoot, c.slug);
-  const bases = c.bases?.length ? c.bases : ["base-node"];
+  const legacyBases = c.bases?.length ? c.bases : ["base-node"];
+  const starter =
+    STARTER_MAP[legacyBases[0]] ?? String(legacyBases[0]).replace(/^base-/, "");
   const packages = c.packages ?? [];
-  const primaryBase = bases[0];
   const prompt = (promptFromRef || c.prompt || "").trim();
-  const hasOracle = Boolean(c.oracle);
+  const hasTest = Boolean(c.oracle);
   const hasHttp = Boolean(c.http);
   const solutionFiles = c.files ?? {};
 
   if (Object.keys(solutionFiles).length === 0) {
     throw new Error(`Case ${c.slug} has empty solution files`);
   }
-  if (!hasOracle && !hasHttp) {
-    throw new Error(`Case ${c.slug} needs api_oracle and/or http grades`);
+  if (!hasTest && !hasHttp) {
+    throw new Error(`Case ${c.slug} needs tests and/or http checks`);
   }
 
   const tags = [
@@ -102,25 +90,33 @@ function materialize(c, promptFromRef) {
     ]),
   ];
 
-  const gradeLines = ["  - build: true"];
+  const checkLines = ["  - build: true"];
   if (packages.length) {
-    gradeLines.push(
+    checkLines.push(
       `  - package_deps:\n      packages: [${packages.map((p) => yamlQuote(p)).join(", ")}]`,
     );
   }
-  if (hasOracle) {
-    // Run ONLY the agent-hidden oracle file (not fixture test/health.test.js).
-    // MITII_NO_LISTEN prevents solution servers from holding the test process open.
-    gradeLines.push(`  - api_oracle:
-      command: "MITII_NO_LISTEN=1 node --test test/oracle.test.js"
+  if (hasTest) {
+    checkLines.push(`  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
       timeoutMs: 120000`);
+  }
+  const seen = new Set();
+  for (const m of c.markers ?? []) {
+    if (seen.has(m)) continue;
+    seen.add(m);
+    checkLines.push("  - contains:");
+    checkLines.push(`      file: ${c.gradeFile}`);
+    checkLines.push(`      text: ${yamlQuote(m)}`);
+  }
+  if (hasHttp) {
+    checkLines.push(`  - http: ${JSON.stringify(c.http)}`);
   }
 
   const taskYaml = `id: ${id}
 title: ${yamlQuote(c.title)}
 ecosystem: js
-bases:
-${bases.map((b) => `  - ${b}`).join("\n")}
+starter: ${starter}
 family: api
 packages: [${packages.map((p) => yamlQuote(p)).join(", ")}]
 difficulty: ${c.difficulty}
@@ -128,22 +124,22 @@ category: backend
 language: javascript
 tags: [${tags.map((t) => yamlQuote(t)).join(", ")}]
 timeoutSec: 300
-promptFile: spec.md
+promptFile: prompt.md
 readmeFile: README.md
-grade:
-${gradeLines.join("\n")}
+checks:
+${checkLines.join("\n")}
 `;
 
   const implHint =
-    primaryBase === "base-nest-js"
-      ? `Implement under the NestJS fixture (\`${c.gradeFile}\` and related modules). Keep the app buildable with \`npm run build\`.`
+    starter === "nest-js"
+      ? `Implement under the NestJS starter (\`${c.gradeFile}\` and related modules). Keep the app buildable with \`npm run build\`.`
       : `Implement primarily in \`${c.gradeFile}\` (add helper modules under \`src/\` as needed). Keep \`npm run build\` succeeding.${
           packages.length
             ? ` Install required packages: ${packages.map((p) => `\`${p}\``).join(", ")}.`
             : ""
         }`;
 
-  const spec = `${prompt}
+  const promptMd = `${prompt}
 
 ${implHint}
 `;
@@ -157,48 +153,39 @@ ${implHint}
 
 ${prompt.split("\n")[0]}
 
-## Ecosystem
+## Starter
 
-\`js\` — ${kind} (prompt #${c.n} from \`references/node-tasks.md\`).
-
-## Bases
-
-${bases.map((b) => `- \`${b}\``).join("\n")}
+\`${starter}\` — ${kind} (prompt #${c.n}).
 
 ## Packages
 
-${packages.length ? packages.map((p) => `- \`${p}\``).join("\n") : "_None beyond the base fixture._"}
+${packages.length ? packages.map((p) => `- \`${p}\``).join("\n") : "_None beyond the starter._"}
 
 \`\`\`bash
 pnpm case:dry-run ${id}
-pnpm case:dry-run ${id}@${primaryBase}
 \`\`\`
 
-## How we grade
+## How we check
 
-- Shared: \`npm run build\`
-${packages.length ? "- Shared: \`package_deps\` — required packages listed in \`package.json\`\n" : ""}${hasOracle ? "- Shared: \`api_oracle\` — agent-hidden \`node:test\` behavioral suite\n" : ""}${hasHttp ? "- Per-base: HTTP multi-step status / payload / header checks\n" : ""}- Per-base: structural \`contains\` markers
-- \`resources/solution/\` is dry-run only (never shown to the agent)
+- \`npm run build\`
+${packages.length ? "- \`package_deps\`\n" : ""}${hasTest ? "- Hidden \`tests/api.test.js\`\n" : ""}${hasHttp ? "- HTTP checks\n" : ""}- Structural \`contains\` markers
+- \`solution/\` is dry-run only
 
 Source: \`references/node-tasks.md\`.
 `;
 
-  let perBaseGrade = gradeYaml(c.gradeFile, c.markers);
-  if (hasHttp) perBaseGrade += httpGradeYaml(c.http);
-
   const outFiles = {
     "task.yaml": taskYaml,
-    "spec.md": spec,
+    "prompt.md": promptMd,
     "README.md": readme,
-    [`grade/${primaryBase}.yaml`]: perBaseGrade || "- exists:\n    file: package.json\n",
   };
 
   for (const [rel, content] of Object.entries(solutionFiles)) {
-    outFiles[`resources/solution/${primaryBase}/${rel}`] = content;
+    outFiles[`solution/${rel}`] = content;
   }
-  if (hasOracle) {
-    const oracle = c.oracle.endsWith("\n") ? c.oracle : `${c.oracle}\n`;
-    outFiles[`resources/oracle/${primaryBase}/test/oracle.test.js`] = oracle;
+  if (hasTest) {
+    const body = c.oracle.endsWith("\n") ? c.oracle : `${c.oracle}\n`;
+    outFiles["tests/api.test.js"] = body;
   }
 
   const wrote = writeCaseDir(caseDir, outFiles);
@@ -213,7 +200,7 @@ Source: \`references/node-tasks.md\`.
 
 function main() {
   if (!existsSync(REF)) {
-    console.error(`Missing ${REF}`);
+    console.error(`Missing ${REF} — generators need the reference prompts file.`);
     process.exit(1);
   }
   const prompts = parsePrompts(readFileSync(REF, "utf8"));

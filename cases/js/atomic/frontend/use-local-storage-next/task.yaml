@@ -1,0 +1,32 @@
+id: "frontend-use-local-storage-next"
+title: "Custom Hook Extraction (useLocalStorage)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "custom-hooks"
+  - "localStorage"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"persistent-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "useLocalStorage"
+  - contains:
+      file: "app/page.jsx"
+      text: "localStorage"

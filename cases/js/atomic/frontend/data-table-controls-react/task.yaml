@@ -1,0 +1,45 @@
+id: "frontend-data-table-controls-react"
+title: "Data Table with Pagination, Sorting & Filtering"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "table"
+  - "pagination"
+  - "filter"
+  - "sort"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"table-search\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"page-size-select\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"next-page\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"prev-page\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"page-indicator\""
+  - contains:
+      file: "src/App.jsx"
+      text: "Page "
+  - contains:
+      file: "src/App.jsx"
+      text: " of "

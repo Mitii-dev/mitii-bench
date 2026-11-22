@@ -1,0 +1,32 @@
+id: "backend-os-system-stats"
+title: "OS Metrics Monitor"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "easy"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "core"
+  - "vanilla"
+  - "node-core"
+  - "smoke"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/systemStats.js"
+      text: "getSystemStats"
+  - contains:
+      file: "src/systemStats.js"
+      text: "loadavg"
+  - contains:
+      file: "src/systemStats.js"
+      text: "freemem"

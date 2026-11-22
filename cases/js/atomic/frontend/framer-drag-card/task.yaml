@@ -1,0 +1,36 @@
+id: "frontend-framer-drag-card"
+title: "Framer Motion: Drag Constraints"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "framer-motion"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "framer-motion"
+  - "animation"
+  - "drag"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"drag-card\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"drag-container\""
+  - contains:
+      file: "src/App.jsx"
+      text: "framer-motion"
+  - contains:
+      file: "src/App.jsx"
+      text: "drag"
+  - contains:
+      file: "src/App.jsx"
+      text: "dragConstraints"

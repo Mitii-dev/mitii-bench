@@ -1,0 +1,35 @@
+id: "frontend-click-outside-dropdown-react"
+title: "React Synthetic Events vs Native Events"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "events"
+  - "click-outside"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"dropdown-menu\""
+  - contains:
+      file: "src/App.jsx"
+      text: "addEventListener"
+  - contains:
+      file: "src/App.jsx"
+      text: "dropdown-menu"
+  - contains:
+      file: "src/App.jsx"
+      text: "contains"

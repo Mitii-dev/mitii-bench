@@ -1,0 +1,68 @@
+id: "frontend-site-nav-pages-next"
+title: "Site nav + footer pages with dummy content"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "nav"
+  - "footer"
+  - "pages"
+  - "smoke"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "Home"
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "About"
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "Careers"
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "Terms and Conditions"
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "Privacy Policy"
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "data-testid=\"main-nav\""
+  - contains:
+      file: "components/SiteChrome.jsx"
+      text: "data-testid=\"site-footer\""
+  - exists:
+      file: "app/about/page.js"
+  - exists:
+      file: "app/careers/page.js"
+  - exists:
+      file: "app/terms/page.js"
+  - exists:
+      file: "app/privacy/page.js"
+  - contains:
+      file: "app/page.js"
+      text: "Home"
+  - contains:
+      file: "app/about/page.js"
+      text: "About"
+  - contains:
+      file: "app/careers/page.js"
+      text: "Careers"
+  - contains:
+      file: "app/terms/page.js"
+      text: "Terms and Conditions"
+  - contains:
+      file: "app/privacy/page.js"
+      text: "Privacy Policy"

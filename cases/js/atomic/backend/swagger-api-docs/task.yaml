@@ -1,0 +1,47 @@
+id: "backend-swagger-api-docs"
+title: "OpenAPI / Swagger Documentation Generator"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "swagger-ui-express"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "swagger-ui-express"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "/api-docs"
+  - contains:
+      file: "src/index.js"
+      text: "swagger"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 15000
+      requests:
+        - method: "GET"
+          path: "/api-docs/"
+          expect:
+            status: 200
+            bodyContains: "swagger"
+        - method: "GET"
+          path: "/health"
+          expect:
+            status: 200
+            jsonSubset:
+              status: "ok"

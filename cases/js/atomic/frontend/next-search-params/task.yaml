@@ -1,0 +1,31 @@
+id: "frontend-next-search-params"
+title: "Next.js App Router: Search Query Parameters"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "next-router"
+  - "routing"
+  - "search-params"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "app/page.js"
+      text: "data-testid=\"query-input\""
+  - contains:
+      file: "app/page.js"
+      text: "data-testid=\"search-results\""
+  - contains:
+      file: "app/page.js"
+      text: "useSearchParams"
+  - contains:
+      file: "app/page.js"
+      text: "next/navigation"

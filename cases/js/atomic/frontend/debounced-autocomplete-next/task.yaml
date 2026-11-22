@@ -1,0 +1,42 @@
+id: "frontend-debounced-autocomplete-next"
+title: "Search Bar with Live Debounced Auto-Complete"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "search"
+  - "debounce"
+  - "autocomplete"
+  - "keyboard"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"search-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"search-suggestions\""
+  - contains:
+      file: "app/page.jsx"
+      text: "ArrowDown"
+  - contains:
+      file: "app/page.jsx"
+      text: "ArrowUp"
+  - contains:
+      file: "app/page.jsx"
+      text: "300"
+  - contains:
+      file: "app/page.jsx"
+      text: "debounce"

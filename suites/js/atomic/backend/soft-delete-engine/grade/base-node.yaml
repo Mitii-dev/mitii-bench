@@ -1,6 +1,0 @@
-- contains:
-    file: src/softDelete.js
-    text: "deleted_at"
-- contains:
-    file: src/softDelete.js
-    text: "soft"

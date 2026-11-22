@@ -1,0 +1,41 @@
+id: "frontend-inactivity-warning-react"
+title: "User Inactivity Auto-Logout Warning"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "idle"
+  - "session"
+  - "modal"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"inactivity-modal\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"stay-active-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "60000"
+  - contains:
+      file: "src/App.jsx"
+      text: "mousemove"
+  - contains:
+      file: "src/App.jsx"
+      text: "keypress"
+  - contains:
+      file: "src/App.jsx"
+      text: "Stay Logged In"

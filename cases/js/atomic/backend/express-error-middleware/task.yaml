@@ -1,0 +1,51 @@
+id: "backend-express-error-middleware"
+title: "Express Error Handling Middleware"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+  - "smoke"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/errorMiddleware.js"
+      text: "err"
+  - contains:
+      file: "src/errorMiddleware.js"
+      text: "statusCode"
+  - contains:
+      file: "src/errorMiddleware.js"
+      text: "error"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 15000
+      requests:
+        - method: "GET"
+          path: "/boom"
+          expect:
+            status: 418
+            jsonSubset:
+              error: "Something broke"
+              status: 418
+        - method: "GET"
+          path: "/fail"
+          expect:
+            status: 500
+            jsonPaths:
+              - "error"
+              - "status"

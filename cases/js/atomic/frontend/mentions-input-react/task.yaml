@@ -1,0 +1,38 @@
+id: "frontend-mentions-input-react"
+title: "Mentions Input Field (@username)"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "mentions"
+  - "autocomplete"
+  - "textarea"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"mention-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"mention-dropdown\""
+  - contains:
+      file: "src/App.jsx"
+      text: "@"
+  - contains:
+      file: "src/App.jsx"
+      text: "mention-dropdown"
+  - contains:
+      file: "src/App.jsx"
+      text: "USERS"

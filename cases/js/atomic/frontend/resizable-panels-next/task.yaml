@@ -1,0 +1,41 @@
+id: "frontend-resizable-panels-next"
+title: "Split View / Resizable Panels"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "split"
+  - "resize"
+  - "panels"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"left-panel\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"right-panel\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"resize-handle\""
+  - contains:
+      file: "app/page.jsx"
+      text: "resize-handle"
+  - contains:
+      file: "app/page.jsx"
+      text: "onMouseDown"
+  - contains:
+      file: "app/page.jsx"
+      text: "width"

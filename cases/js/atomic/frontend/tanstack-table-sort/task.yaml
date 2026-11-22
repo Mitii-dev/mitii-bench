@@ -1,0 +1,35 @@
+id: "frontend-tanstack-table-sort"
+title: "TanStack Table v8: Sortable Data Table"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "tanstack-table"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "tanstack-table"
+  - "table"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"sort-header-name\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"table-row-0\""
+  - contains:
+      file: "src/App.jsx"
+      text: "@tanstack/react-table"
+  - contains:
+      file: "src/App.jsx"
+      text: "useReactTable"
+  - contains:
+      file: "src/App.jsx"
+      text: "getSortedRowModel"

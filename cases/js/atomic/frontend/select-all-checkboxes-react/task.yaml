@@ -1,0 +1,32 @@
+id: "frontend-select-all-checkboxes-react"
+title: "Multi-Select Checkbox Group with Select All"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "checkbox"
+  - "select-all"
+  - "forms"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"select-all-checkbox\""
+  - contains:
+      file: "src/App.jsx"
+      text: "item-checkbox-"
+  - contains:
+      file: "src/App.jsx"
+      text: "Select All"

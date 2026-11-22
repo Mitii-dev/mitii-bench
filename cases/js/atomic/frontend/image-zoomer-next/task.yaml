@@ -1,0 +1,38 @@
+id: "frontend-image-zoomer-next"
+title: "Interactive Product Image Zoomer"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "zoom"
+  - "image"
+  - "ecommerce"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"product-image\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"zoom-preview\""
+  - contains:
+      file: "app/page.jsx"
+      text: "backgroundPosition"
+  - contains:
+      file: "app/page.jsx"
+      text: "backgroundSize"
+  - contains:
+      file: "app/page.jsx"
+      text: "onMouseMove"

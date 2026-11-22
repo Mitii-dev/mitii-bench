@@ -1,0 +1,41 @@
+id: "frontend-inactivity-warning-next"
+title: "User Inactivity Auto-Logout Warning"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "idle"
+  - "session"
+  - "modal"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"inactivity-modal\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"stay-active-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "60000"
+  - contains:
+      file: "app/page.jsx"
+      text: "mousemove"
+  - contains:
+      file: "app/page.jsx"
+      text: "keypress"
+  - contains:
+      file: "app/page.jsx"
+      text: "Stay Logged In"

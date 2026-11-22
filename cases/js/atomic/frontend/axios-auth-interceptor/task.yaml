@@ -1,0 +1,36 @@
+id: "frontend-axios-auth-interceptor"
+title: "Axios Integration with Custom Interceptor Hook"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "axios"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "axios"
+  - "auth"
+  - "http"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"axios-fetch-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"global-auth-error\""
+  - contains:
+      file: "src/App.jsx"
+      text: "axios"
+  - contains:
+      file: "src/App.jsx"
+      text: "interceptors"
+  - contains:
+      file: "src/App.jsx"
+      text: "401"

@@ -1,0 +1,38 @@
+id: "frontend-with-authorization-hoc-react"
+title: "High Order Components (HOC)"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "hoc"
+  - "authorization"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"dashboard-view\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"unauthorized-msg\""
+  - contains:
+      file: "src/App.jsx"
+      text: "withAuthorization"
+  - contains:
+      file: "src/App.jsx"
+      text: "admin"
+  - contains:
+      file: "src/App.jsx"
+      text: "Dashboard"

@@ -1,0 +1,38 @@
+id: "frontend-stepper-indicator-react"
+title: "Stepper Indicator Component"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "stepper"
+  - "progress"
+  - "wizard"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"stepper\""
+  - contains:
+      file: "src/App.jsx"
+      text: "step-node-"
+  - contains:
+      file: "src/App.jsx"
+      text: "completed"
+  - contains:
+      file: "src/App.jsx"
+      text: "active"
+  - contains:
+      file: "src/App.jsx"
+      text: "pending"

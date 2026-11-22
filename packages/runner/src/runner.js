@@ -8,6 +8,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { readMitiiSessionMetrics, runMitiiAgent } from "@mitii-bench/adapter-mitii";
+import { verifyCheck } from "@mitii-bench/checks";
 import { loadConfig } from "./config.js";
 import {
   discoverProjects,
@@ -17,7 +18,6 @@ import {
 } from "./loader.js";
 import { repoRoot, reportsDir, workspacesDir } from "./paths.js";
 import { diffSnapshots, snapshotTree } from "./snapshot.js";
-import { verifyCheck } from "./verifiers.js";
 import {
   applyPatch,
   createWorkspace,
@@ -29,8 +29,9 @@ export async function dryRunTask(taskIdOrPath, options = {}) {
   const root = repoRoot();
   const task = resolveTask(root, taskIdOrPath);
   const runId = options.runId ?? `dry-${Date.now()}`;
+  const starterPath = task.starterPath ?? task.fixturePath;
   const ws = createWorkspace({
-    fixturePath: task.fixturePath,
+    fixturePath: starterPath,
     workspacesRoot: workspacesDir(root),
     runId,
     caseId: (task.runId ?? task.id).replaceAll("@", "__"),
@@ -40,29 +41,27 @@ export async function dryRunTask(taskIdOrPath, options = {}) {
   try {
     prepareSetup(ws.path, task);
     await applySolution(ws.path, task);
-    await ensureWorkspacePackages(ws.path, task, task.fixturePath);
+    await ensureWorkspacePackages(ws.path, task, starterPath);
     const before = snapshotTree(ws.path);
-    // Solution already applied — snapshot after as "agent work"
     const after = snapshotTree(ws.path);
-    // Agent-hidden behavioral oracles (injected only for grading)
-    applyOracle(ws.path, task);
+    applyTests(ws.path, task);
     const results = [];
     for (const check of task.checks) {
-      // dry-run: treat agent as success
       if (check.type === "agent_exit") {
         results.push({ type: "agent_exit", passed: true, details: "dry-run" });
         continue;
       }
       if (check.type === "workspace_changed") {
-        // Compare fixture baseline vs solved workspace instead
-        const fixtureSnap = snapshotTree(task.fixturePath);
+        const fixtureSnap = snapshotTree(starterPath);
         const solvedSnap = snapshotTree(ws.path);
         const changed = diffSnapshots(fixtureSnap, solvedSnap).filter(
           (p) =>
             !p.startsWith("node_modules") &&
             !p.startsWith("__bench__") &&
+            !p.startsWith("tests/") &&
             !p.includes("/__bench__/") &&
             !p.includes("oracle.test.js") &&
+            !p.includes(".test.") &&
             !p.startsWith("package-lock.json"),
         );
         results.push({
@@ -85,7 +84,8 @@ export async function dryRunTask(taskIdOrPath, options = {}) {
     const passed = results.every((r) => r.passed);
     const report = {
       id: task.runId ?? task.id,
-      base: task.base,
+      starter: task.starter,
+      base: task.starter,
       mode: "dry-run",
       passed,
       workspace: ws.path,
@@ -103,8 +103,9 @@ export async function runTask(taskIdOrPath, options = {}) {
   const config = loadConfig(root);
   const task = resolveTask(root, taskIdOrPath);
   const runId = options.runId ?? `run-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+  const starterPath = task.starterPath ?? task.fixturePath;
   const ws = createWorkspace({
-    fixturePath: task.fixturePath,
+    fixturePath: starterPath,
     workspacesRoot: workspacesDir(root),
     runId,
     caseId: (task.runId ?? task.id).replaceAll("@", "__"),
@@ -127,9 +128,8 @@ export async function runTask(taskIdOrPath, options = {}) {
   }
 
   const after = snapshotTree(ws.path);
-  await ensureWorkspacePackages(ws.path, task, task.fixturePath);
-  // Inject agent-hidden oracles after the agent finishes (never visible during agent work)
-  applyOracle(ws.path, task);
+  await ensureWorkspacePackages(ws.path, task, starterPath);
+  applyTests(ws.path, task);
   const results = [];
   for (const check of task.checks) {
     results.push(
@@ -146,7 +146,8 @@ export async function runTask(taskIdOrPath, options = {}) {
   const session = options.skipAgent ? null : readMitiiSessionMetrics(ws.path);
   const report = {
     id: task.runId ?? task.id,
-    base: task.base,
+    starter: task.starter,
+    base: task.starter,
     mode: options.skipAgent ? "grade-only" : "agent",
     passed: results.every((r) => r.passed),
     agent: {
@@ -180,9 +181,8 @@ export async function runProject(projectId, options = {}) {
   const startStep = options.stepFrom ?? 1;
   const endStep = options.stepTo ?? project.steps[project.steps.length - 1].step;
 
-  // Cumulative: one workspace, apply each step's solution or agent sequentially
   const first = project.steps[0].task;
-  const fixturePath = first.fixturePath;
+  const fixturePath = first.starterPath ?? first.fixturePath;
   const ws = createWorkspace({
     fixturePath,
     workspacesRoot: workspacesDir(root),
@@ -208,11 +208,11 @@ export async function runProject(projectId, options = {}) {
         mitiiBin: loadConfig(root).mitiiBin,
       });
       if (agentResult.skipped) {
-        // fall back to solution for CI-less environments when --allow-solution-fallback
         if (options.allowSolutionFallback) await applySolution(ws.path, step.task);
       }
     }
 
+    applyTests(ws.path, step.task);
     const before = snapshotTree(ws.path);
     const after = before;
     const results = [];
@@ -236,7 +236,6 @@ export async function runProject(projectId, options = {}) {
       );
     }
 
-    // Regression: re-run prior steps' grade (non-workspace checks)
     if (project.cumulative && step.regression !== false) {
       for (const prev of project.steps) {
         if (prev.step >= step.step) break;
@@ -302,30 +301,42 @@ export async function validateAll(root = repoRoot()) {
 function prepareSetup(workspace, task) {
   const mock = task.setup?.mock;
   if (!mock) return;
-  const from = join(task.caseDir, "resources", mock);
-  if (!existsSync(from)) {
-    throw new Error(`setup.mock not found: resources/${mock}`);
+  const candidates = [
+    join(task.caseDir, mock),
+    join(task.caseDir, "resources", mock),
+  ];
+  const from = candidates.find((p) => existsSync(p));
+  if (!from) {
+    throw new Error(`setup.mock not found: ${mock}`);
   }
   cpSync(from, join(workspace, mock.includes("/") ? mock.split("/").pop() : mock));
 }
 
 async function applySolution(workspace, task) {
-  const perBase = join(task.caseDir, "resources", "solution", task.base);
-  const legacy = join(task.caseDir, "resources", "solution");
+  const solutionDir = task.solutionDir ?? join(task.caseDir, "solution");
+  const legacyPerStarter = join(task.caseDir, "resources", "solution", task.starter);
+  const legacyPerBase = join(task.caseDir, "resources", "solution", `base-${task.starter}`);
+  const legacyFlat = join(task.caseDir, "resources", "solution");
 
   let copyFrom = null;
-  if (existsSync(perBase) && statSync(perBase).isDirectory()) {
-    copyFrom = perBase;
-  } else if (existsSync(legacy) && statSync(legacy).isDirectory()) {
-    // Flat solution files live directly under solution/ (not base-* children only)
-    const entries = readdirSync(legacy).filter((e) => e !== ".gitkeep");
-    const hasFlatFiles = entries.some((e) => statSync(join(legacy, e)).isFile());
-    if (hasFlatFiles) copyFrom = legacy;
+  for (const candidate of [solutionDir, legacyPerStarter, legacyPerBase, legacyFlat]) {
+    if (!existsSync(candidate) || !statSync(candidate).isDirectory()) continue;
+    const entries = readdirSync(candidate).filter((e) => e !== ".gitkeep" && !e.startsWith("base-"));
+    if (entries.length === 0) continue;
+    // Prefer flat file trees (not only nested base-* dirs)
+    const hasContent = entries.some((e) => {
+      const p = join(candidate, e);
+      return statSync(p).isFile() || (statSync(p).isDirectory() && !e.startsWith("base-"));
+    });
+    if (hasContent || candidate === solutionDir) {
+      copyFrom = candidate;
+      break;
+    }
   }
 
   if (copyFrom) {
-    const copied = copySolutionDir(copyFrom, workspace);
-    linkFixtureNodeModules(task.fixturePath, workspace);
+    const copied = walkCopy(copyFrom, workspace);
+    linkFixtureNodeModules(task.starterPath ?? task.fixturePath, workspace);
     return { method: copied ? "solution-dir" : "noop" };
   }
   if (existsSync(task.solutionPatch)) {
@@ -335,26 +346,35 @@ async function applySolution(workspace, task) {
 }
 
 /**
- * Copy agent-hidden behavioral oracles into the workspace for grading only.
- * Looks under resources/oracle/<base>/ then resources/oracle/.
+ * Copy agent-hidden tests into the workspace for checking only.
  */
-function applyOracle(workspace, task) {
-  const perBase = join(task.caseDir, "resources", "oracle", task.base);
-  const legacy = join(task.caseDir, "resources", "oracle");
+function applyTests(workspace, task) {
+  const testsDir = task.testsDir ?? join(task.caseDir, "tests");
+  const legacyPerStarter = join(task.caseDir, "resources", "oracle", task.starter);
+  const legacyPerBase = join(task.caseDir, "resources", "oracle", `base-${task.starter}`);
+  const legacyFlat = join(task.caseDir, "resources", "oracle");
+
   let copyFrom = null;
-  if (existsSync(perBase) && statSync(perBase).isDirectory()) {
-    copyFrom = perBase;
-  } else if (existsSync(legacy) && statSync(legacy).isDirectory()) {
-    const entries = readdirSync(legacy).filter((e) => e !== ".gitkeep" && !e.startsWith("base-"));
-    if (entries.length > 0) copyFrom = legacy;
+  for (const candidate of [testsDir, legacyPerStarter, legacyPerBase, legacyFlat]) {
+    if (!existsSync(candidate) || !statSync(candidate).isDirectory()) continue;
+    const entries = readdirSync(candidate).filter(
+      (e) => e !== ".gitkeep" && !e.startsWith("base-"),
+    );
+    if (entries.length > 0) {
+      copyFrom = candidate;
+      break;
+    }
   }
   if (!copyFrom) return { method: "noop" };
-  const copied = walkCopy(copyFrom, workspace);
-  return { method: copied ? "oracle-dir" : "noop" };
-}
-
-function copySolutionDir(solutionDir, workspace) {
-  return walkCopy(solutionDir, workspace);
+  // Case `tests/` holds flat files (ui.test.jsx); copy into workspace/tests/.
+  // Legacy oracle trees already include __bench__/ or test/ — copy at workspace root.
+  const dest =
+    copyFrom === testsDir || /[/\\]tests$/.test(copyFrom)
+      ? join(workspace, "tests")
+      : workspace;
+  mkdirSync(dest, { recursive: true });
+  const copied = walkCopy(copyFrom, dest);
+  return { method: copied ? "tests-dir" : "noop" };
 }
 
 function walkCopy(src, destRoot, rel = "") {
@@ -379,15 +399,13 @@ function resolveTask(root, taskIdOrPath) {
   if (existsSync(join(taskIdOrPath, "task.yaml"))) {
     return loadTaskDir(taskIdOrPath, root);
   }
-  const { id, base } = parseTaskRef(taskIdOrPath);
-  const tasks = discoverTasks(root, { id, base: base ?? undefined });
+  const { id } = parseTaskRef(taskIdOrPath);
+  const tasks = discoverTasks(root, { id });
   const hit =
     tasks.find((t) => !t.error && (t.runId === taskIdOrPath || t.instanceId === taskIdOrPath)) ||
-    tasks.find((t) => !t.error && t.id === id && (!base || t.base === base));
+    tasks.find((t) => !t.error && t.id === id);
   if (!hit) {
-    throw new Error(
-      `Task not found: ${taskIdOrPath}${base ? "" : " (hint: use id@base when the case has multiple bases)"}`,
-    );
+    throw new Error(`Task not found: ${taskIdOrPath}`);
   }
   return hit;
 }
@@ -419,9 +437,7 @@ function formatAgentMarkdown(agent) {
   }
   const totalMs = agent.durationMs;
   const totalLabel =
-    totalMs == null
-      ? "n/a"
-      : `${(totalMs / 1000).toFixed(1)}s (${totalMs}ms)`;
+    totalMs == null ? "n/a" : `${(totalMs / 1000).toFixed(1)}s (${totalMs}ms)`;
   return [
     "## Agent",
     "",

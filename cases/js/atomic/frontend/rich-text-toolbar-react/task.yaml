@@ -1,0 +1,47 @@
+id: "frontend-rich-text-toolbar-react"
+title: "Rich Text Formatting Toolbar"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "editor"
+  - "toolbar"
+  - "contentEditable"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"editor-area\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"btn-bold\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"btn-italic\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"btn-underline\""
+  - contains:
+      file: "src/App.jsx"
+      text: "execCommand"
+  - contains:
+      file: "src/App.jsx"
+      text: "bold"
+  - contains:
+      file: "src/App.jsx"
+      text: "italic"
+  - contains:
+      file: "src/App.jsx"
+      text: "underline"

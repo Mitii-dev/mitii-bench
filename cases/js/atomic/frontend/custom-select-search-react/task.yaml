@@ -1,0 +1,38 @@
+id: "frontend-custom-select-search-react"
+title: "Custom Dropdown Select with Search Filter"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "select"
+  - "dropdown"
+  - "search"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"custom-select-trigger\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"custom-select-search\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"custom-select-options\""
+  - contains:
+      file: "src/App.jsx"
+      text: "custom-select-options"
+  - contains:
+      file: "src/App.jsx"
+      text: "filter"

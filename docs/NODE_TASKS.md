@@ -8,37 +8,33 @@ Data:
 - `scripts/data/node-ecosystem-cases.mjs` (26–55)
 - `scripts/data/node-realworld-cases.mjs` + `node-realworld-solutions.mjs` (56–100)
 
-## Applicability matrix
+## Applicability
 
-| Prompt range | Topic | Base | Notes |
+| Prompt range | Topic | Starter | Notes |
 |---|---|---|---|
-| 1–25 | Node core & async | `base-node` | Vanilla; solutions + `node:test` oracles; HTTP where the contract is an API |
-| 26–43, 48–55 | Express / Prisma / Socket / Bull / Fastify / Auth / GraphQL / CLI | `base-node` | `package_deps` + solutions; extra deps mocked or installed only if missing from the fixture |
-| 44–47 | NestJS | `base-nest-js` | TypeScript solutions + HTTP |
-| 56–100 | Real-world backend | `base-node` | Vanilla or `ecosystem-lib`; Redis/S3/OAuth/SAML mocked in-memory |
+| 1–25 | Node core & async | `node` | Vanilla; solutions + `tests/api.test.js`; HTTP where needed |
+| 26–43, 48–55 | Express / Prisma / Socket / … | `node` | `package_deps` + solutions |
+| 44–47 | NestJS | `nest-js` | TypeScript solutions + HTTP |
+| 56–100 | Real-world backend | `node` | Vanilla or `ecosystem-lib` |
 
-## Four grading layers
+## Check layers
 
-1. **`contains` / `exists`** — structural source contracts (routes, APIs, markers)
-2. **`package_deps`** — required names listed in workspace `package.json` (when `packages:` is non-empty)
-3. **`api_oracle`** — agent-hidden `MITII_NO_LISTEN=1 node --test test/oracle.test.js` (happy path + failure/edge)
-4. **`http`** — start the server and assert status, JSON payload (`jsonSubset` / `jsonEquals` / `jsonPaths`), and headers. Optional `sidecar` starts a companion process (e.g. mock upstream) and injects its port via `sidecar.portEnv`.
+1. `contains` / `exists`
+2. `package_deps` when `packages:` is non-empty
+3. `test:` — agent-hidden `node --test tests/api.test.js`
+4. `http:` — start server and assert payloads
 
-Workspace `npm install` runs **only for packages not already in the fixture `node_modules`**. The `base-node` fixture and solutions gate `listen()` on `MITII_NO_LISTEN` so oracles do not hang.
+See [CHECKS.md](./CHECKS.md).
 
 ## Tags
 
-- `vanilla` — no extra packages beyond the fixture
-- `ecosystem-lib` — third-party packages declared
-- `smoke` — CI dry-run subset
-- `node-tasks` — imported from the reference bank
+- `vanilla` / `ecosystem-lib` / `smoke` / `node-tasks`
 
 ## Commands
 
 ```bash
 pnpm generate:node-backend --force
 pnpm case:validate
-pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke --family=api
-pnpm case:dry-run backend-crypto-scrypt-password
-pnpm cases --family=api --tag=node-tasks
+pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke
+pnpm case:dry-run backend-http-native-server
 ```

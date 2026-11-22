@@ -1,0 +1,42 @@
+id: "frontend-fetch-users-loading-react"
+title: "Fetching Data with useEffect & Handling Loading States"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useEffect"
+  - "fetch"
+  - "loading"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"loading-spinner\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"user-list\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"error-message\""
+  - contains:
+      file: "src/App.jsx"
+      text: "useEffect"
+  - contains:
+      file: "src/App.jsx"
+      text: "loading"
+  - contains:
+      file: "src/App.jsx"
+      text: "setTimeout"

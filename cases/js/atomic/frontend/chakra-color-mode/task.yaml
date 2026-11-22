@@ -1,0 +1,32 @@
+id: "frontend-chakra-color-mode"
+title: "Chakra UI: Color Mode Switcher & Responsive Box"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "chakra"
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "chakra"
+  - "theme"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"chakra-card\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"chakra-theme-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "@chakra-ui/react"
+  - contains:
+      file: "src/App.jsx"
+      text: "useColorMode"

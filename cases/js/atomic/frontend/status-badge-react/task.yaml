@@ -1,0 +1,38 @@
+id: "frontend-status-badge-react"
+title: "Conditional Rendering"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "conditional-rendering"
+  - "react-tasks"
+  - "vanilla"
+  - "smoke"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"status-container\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"status-toggle-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"status-badge\""
+  - contains:
+      file: "src/App.jsx"
+      text: "Online"
+  - contains:
+      file: "src/App.jsx"
+      text: "Offline"

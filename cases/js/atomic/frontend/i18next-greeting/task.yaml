@@ -1,0 +1,35 @@
+id: "frontend-i18next-greeting"
+title: "React-i18next: Internationalization"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "i18next"
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "i18next"
+  - "i18n"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"lang-select\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"translated-greeting\""
+  - contains:
+      file: "src/App.jsx"
+      text: "react-i18next"
+  - contains:
+      file: "src/App.jsx"
+      text: "i18next"
+  - contains:
+      file: "src/App.jsx"
+      text: "useTranslation"

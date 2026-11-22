@@ -1,0 +1,44 @@
+id: "frontend-fab-menu-next"
+title: "Animated Floating Action Button (FAB) Menu"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "fab"
+  - "menu"
+  - "animation"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"fab-main\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"fab-child-1\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"fab-child-2\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"fab-child-3\""
+  - contains:
+      file: "app/page.jsx"
+      text: "fab-child-1"
+  - contains:
+      file: "app/page.jsx"
+      text: "fab-child-2"
+  - contains:
+      file: "app/page.jsx"
+      text: "fab-child-3"

@@ -1,0 +1,33 @@
+id: "backend-socketio-jwt-handshake"
+title: "Socket.io JWT Authentication Handshake"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "socket.io"
+  - "jsonwebtoken"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "socket.io"
+        - "jsonwebtoken"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/socketAuth.js"
+      text: "handshake.auth"
+  - contains:
+      file: "src/socketAuth.js"
+      text: "io.use"

@@ -1,0 +1,44 @@
+id: "backend-secure-cookie-session"
+title: "Secure Cookie Session Store"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "ecosystem-lib"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "SameSite"
+  - contains:
+      file: "src/index.js"
+      text: "AES"
+  - contains:
+      file: "src/index.js"
+      text: "httpOnly"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/login"
+          json:
+            userId: "u1"
+          expect:
+            status: 200
+            jsonSubset:
+              ok: true

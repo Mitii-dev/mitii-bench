@@ -1,5 +1,7 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
+  accessSync,
+  constants,
   existsSync,
   mkdtempSync,
   readdirSync,
@@ -9,7 +11,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir, tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { delimiter, join, resolve } from "node:path";
 
 /**
  * Invoke Mitii CLI against an isolated workspace.
@@ -35,7 +37,7 @@ export async function runMitiiAgent({
       exitCode: 127,
       stdout: "",
       stderr:
-        "Mitii CLI not found. Set MITII_BIN or runner.config.json mitiiBin to apps/cli/bin/mitii.js",
+        "Mitii CLI not found. Set MITII_BIN, put `mitii` on PATH, or set runner.config.local.json mitiiBin.",
       durationMs: 0,
       timedOut: false,
       skipped: true,
@@ -199,6 +201,10 @@ export function resolveMitiiModelLabel(workspace) {
   return null;
 }
 
+/**
+ * Resolve Mitii CLI binary.
+ * Priority: explicit config → MITII_BIN / MITII_CLI → PATH (`mitii`) → sibling Mitii repo.
+ */
 export function resolveMitiiBin(configured) {
   const candidates = [
     configured,
@@ -206,18 +212,86 @@ export function resolveMitiiBin(configured) {
     process.env.MITII_CLI,
   ].filter(Boolean);
 
+  const fromPath = findOnPath("mitii");
+  if (fromPath) candidates.push(fromPath);
+
   // Common sibling layout: ai-agents/Mitii next to ai-agents/mitii-bench
-  const sibling = resolve(
-    process.cwd(),
-    "../Mitii/apps/cli/bin/mitii.js",
-  );
-  candidates.push(sibling);
+  candidates.push(resolve(process.cwd(), "../Mitii/apps/cli/bin/mitii.js"));
+  candidates.push(resolve(process.cwd(), "../../Mitii/apps/cli/bin/mitii.js"));
 
   for (const candidate of candidates) {
     const abs = resolve(candidate);
     if (existsSync(abs)) return abs;
   }
   return null;
+}
+
+function findOnPath(name) {
+  const pathEnv = process.env.PATH ?? "";
+  const exts =
+    process.platform === "win32"
+      ? (process.env.PATHEXT ?? ".EXE;.CMD;.BAT;.JS").split(";").filter(Boolean)
+      : [""];
+  for (const dir of pathEnv.split(delimiter)) {
+    if (!dir) continue;
+    for (const ext of exts) {
+      const candidate = join(dir, `${name}${ext}`);
+      try {
+        accessSync(candidate, constants.X_OK);
+        return candidate;
+      } catch {
+        if (existsSync(candidate) && candidate.endsWith(".js")) return candidate;
+      }
+    }
+  }
+  // `which` / `where` fallback
+  try {
+    const cmd = process.platform === "win32" ? "where" : "which";
+    const r = spawnSync(cmd, [name], { encoding: "utf8" });
+    const line = String(r.stdout ?? "")
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .find(Boolean);
+    if (line && existsSync(line)) return line;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/**
+ * Run an arbitrary Mitii CLI subcommand (for preflight / diagnostics).
+ * @returns {{ ok: boolean, bin: string|null, exitCode: number, stdout: string, stderr: string }}
+ */
+export async function runMitiiCli(args = ["--version"], options = {}) {
+  const bin = resolveMitiiBin(options.mitiiBin);
+  if (!bin) {
+    return {
+      ok: false,
+      bin: null,
+      exitCode: 127,
+      stdout: "",
+      stderr:
+        "Mitii CLI not found. Set MITII_BIN, put `mitii` on PATH, or set runner.config.local.json mitiiBin.",
+    };
+  }
+  const command = bin.endsWith(".js") ? process.execPath : bin;
+  const finalArgs = bin.endsWith(".js") ? [bin, ...args] : args;
+  const result = await runProcess({
+    command,
+    args: finalArgs,
+    cwd: options.cwd ?? process.cwd(),
+    timeoutMs: options.timeoutMs ?? 60000,
+    env: { CI: "1", ...(options.env ?? {}) },
+  });
+  return {
+    ok: result.exitCode === 0,
+    bin,
+    exitCode: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    timedOut: result.timedOut,
+  };
 }
 
 function runProcess({ command, args, cwd, env, timeoutMs, signal }) {

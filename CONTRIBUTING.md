@@ -3,44 +3,24 @@
 ## Where cases live
 
 ```text
-suites/{ecosystem}/atomic/{category}/{slug}/
-  README.md          # required — explain the case
-  spec.md            # required — agent prompt
-  task.yaml          # bases, family, shared grade
-  grade/<base>.yaml  # ONLY if that base needs different file asserts
-  resources/solution/<base>/
+cases/{ecosystem}/atomic/{category}/{slug}/
+  README.md      # required — explain the case
+  prompt.md      # required — agent prompt
+  task.yaml      # starter + checks
+  tests/         # optional — hidden automated tests
+  solution/      # dry-run known-good implementation
 ```
 
-| Ecosystem | Folder | Fixtures |
+| Ecosystem | Folder | Starters |
 |---|---|---|
-| JavaScript/TS | `suites/js/` | `fixtures/js/base-*` |
-| Python (later) | `suites/python/` | `fixtures/python/base-*` |
+| JavaScript/TS | `cases/js/` | `starters/js/{react-js,next-js,node,…}` |
+| Python (later) | `cases/python/` | `starters/python/…` |
 
-## Why `grade/` might be empty
-
-`grade/` is **optional**. Create `grade/<base>.yaml` only when asserts differ per base (e.g. `src/App.jsx` vs `app/page.js`). Shared recipes stay in `task.yaml` under `grade:`.
-
-`pnpm case:new` no longer writes empty grade stubs.
-
-## Solution folder vs grades (important)
-
-`resources/solution/<base>/` is a **hand-written known-good implementation** for CI / dry-run only.
-
-`resources/oracle/<base>/` holds **agent-hidden** Vitest + Testing Library behavioral tests. The runner copies them into the workspace only when grading (see [docs/UI_ORACLES.md](./docs/UI_ORACLES.md)).
-
-| | Dry-run | Agent eval |
-|---|---|---|
-| Workspace edits | Apply `solution/` | Mitii / the agent |
-| Scoring | Run **grades** on that workspace | Run the **same grades** |
-| Compare to solution? | No — grades only | No — grades only |
-
-Dry-run does **not** generate a solution from grades. It tests: *does this solution pass these grades?*
-
-See [docs/GRADING_AND_DRY_RUN.md](./docs/GRADING_AND_DRY_RUN.md).
+See [docs/AUTHORING.md](./docs/AUTHORING.md) and [docs/CHECKS.md](./docs/CHECKS.md).
 
 ## Catalog is auto-generated
 
-Do not hand-edit `catalog/catalog.json` or `catalog/cases.html`. They are gitignored and rebuilt by:
+Do not hand-edit `catalog/catalog.json` or `catalog/cases.html`. Rebuild with:
 
 - `pnpm case:validate`
 - `pnpm catalog`
@@ -49,12 +29,11 @@ Do not hand-edit `catalog/catalog.json` or `catalog/cases.html`. They are gitign
 ## Add a case
 
 ```bash
-pnpm case:new --yes --ecosystem=js --category=frontend --slug=my-case \
-  --bases=base-react-js \
+pnpm case:new --yes --ecosystem=js --category=frontend --slug=my-case-react \
+  --starter=react-js \
   --prompt='…'
-# edit spec.md + README.md
-# add resources/solution/<base>/
-# add grade/<base>.yaml only if needed
+# edit prompt.md + README.md
+# add solution/ and tests/
 pnpm case:validate
 pnpm case:dry-run <id>
 ```
@@ -64,31 +43,23 @@ pnpm case:dry-run <id>
 ```bash
 pnpm cases --ecosystem=js
 pnpm cases --family=frontend
-pnpm cases --base=base-react-js
+pnpm cases --starter=react-js
 pnpm cases --tag=smoke
-pnpm case:dry-run frontend-site-nav-pages@base-next-js
+pnpm case:dry-run frontend-accessible-modal-react
 ```
 
-## Bulk React frontend cases
-
-To regenerate the corpus derived from `references/react-tasks.md`:
+## Bulk generators
 
 ```bash
 pnpm generate:react-frontend --force
+pnpm generate:node-backend --force
 pnpm case:validate
 pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke
 ```
 
-See [docs/REACT_TASKS.md](./docs/REACT_TASKS.md) for which prompts apply to React vs Next vs library scaffolds.
+## Mitii / CI
 
-## Bulk Node backend cases
-
-To regenerate the corpus derived from `references/node-tasks.md`:
-
-```bash
-pnpm generate:node-backend --force
-pnpm case:validate
-pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke --family=api
-```
-
-See [docs/NODE_TASKS.md](./docs/NODE_TASKS.md).
+- Set `MITII_BIN` (or `runner.config.local.json`) — see [docs/RUNNING_MITII.md](./docs/RUNNING_MITII.md)
+- PR CI: dry-run only (`.github/workflows/ci.yml`)
+- Agent nightly example: `.github/workflows/agent-nightly.example.yml`
+- Always `pnpm preflight` before paid agent runs

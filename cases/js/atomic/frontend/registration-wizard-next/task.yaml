@@ -1,0 +1,47 @@
+id: "frontend-registration-wizard-next"
+title: "Multi-Step Registration Wizard"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "wizard"
+  - "forms"
+  - "multi-step"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"wizard-summary\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"wizard-next\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"wizard-back\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Name"
+  - contains:
+      file: "app/page.jsx"
+      text: "Email"
+  - contains:
+      file: "app/page.jsx"
+      text: "Username"
+  - contains:
+      file: "app/page.jsx"
+      text: "Password"
+  - contains:
+      file: "app/page.jsx"
+      text: "wizard-summary"

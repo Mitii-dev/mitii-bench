@@ -1,0 +1,35 @@
+id: "frontend-breadcrumb-nav-next"
+title: "Breadcrumb Navigation"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "breadcrumb"
+  - "nav"
+  - "routing"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"breadcrumb-nav\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Home"
+  - contains:
+      file: "app/page.jsx"
+      text: "Products"
+  - contains:
+      file: "app/page.jsx"
+      text: "Electronics"

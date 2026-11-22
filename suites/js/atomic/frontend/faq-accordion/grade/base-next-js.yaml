@@ -1,6 +1,0 @@
-- contains:
-    file: app/page.jsx
-    text: "accordion-header-"
-- contains:
-    file: app/page.jsx
-    text: "accordion-panel-"

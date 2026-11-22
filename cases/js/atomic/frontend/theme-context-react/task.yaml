@@ -1,0 +1,39 @@
+id: "frontend-theme-context-react"
+title: "Context API (Theme Switcher)"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "context"
+  - "theme"
+  - "react-tasks"
+  - "vanilla"
+  - "smoke"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"theme-toggle\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"content-panel\""
+  - contains:
+      file: "src/App.jsx"
+      text: "createContext"
+  - contains:
+      file: "src/App.jsx"
+      text: "ThemeProvider"
+  - contains:
+      file: "src/App.jsx"
+      text: "useContext"

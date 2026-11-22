@@ -1,0 +1,41 @@
+id: "frontend-file-dropzone-next"
+title: "File Drag-and-Drop Uploader"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "drag-drop"
+  - "files"
+  - "upload"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"dropzone\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"uploaded-file-list\""
+  - contains:
+      file: "app/page.jsx"
+      text: "active"
+  - contains:
+      file: "app/page.jsx"
+      text: "KB"
+  - contains:
+      file: "app/page.jsx"
+      text: "onDragOver"
+  - contains:
+      file: "app/page.jsx"
+      text: "onDrop"

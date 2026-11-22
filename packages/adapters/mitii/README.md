@@ -2,16 +2,21 @@
 
 Invokes the Mitii CLI against an isolated case workspace.
 
-Configure via:
+## Resolve Mitii binary
 
-- `MITII_BIN` env var, or
-- `runner.config.json` → `mitiiBin`, or
-- sibling path `../Mitii/apps/cli/bin/mitii.js`
+Priority:
 
-Invocation shape (current Mitii CLI):
+1. Explicit `mitiiBin` argument / `runner.config*.json`
+2. `MITII_BIN` or `MITII_CLI`
+3. `mitii` on `PATH`
+4. Sibling `../Mitii/apps/cli/bin/mitii.js`
+
+## Invocation
 
 - Agent / bench default: `mitii agent --cwd <workspace> --prompt-file <tmp> --autonomy apply --origin automation`
 - Other modes: `mitii ask|plan --cwd <workspace> --prompt-file <tmp> --origin automation`
-- After a run, `readMitiiSessionMetrics(workspace)` parses `.mitii/logs/*-thread_*.jsonl` (or legacy `cli-*.jsonl`) for model, start/end, duration, and token usage (written into `reports/runs/.../*.md`).
+- Diagnostics: `runMitiiCli(["doctor"])` / `["setup", "--show"]` / `["--version"]`
 
-Provider/model settings live in Mitii (`mitii setup`, `~/.mitii/config.json`, `.env`) — not in `task.yaml`.
+After a run, `readMitiiSessionMetrics(workspace)` parses `.mitii/logs/*-thread_*.jsonl` for model, duration, and tokens.
+
+Provider/model/API keys live in Mitii (`mitii setup`, `~/.mitii/config.json`, env) — not in `task.yaml`.

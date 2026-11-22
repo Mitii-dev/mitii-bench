@@ -8,23 +8,37 @@ const here = dirname(fileURLToPath(import.meta.url));
 export function repoRoot(cwd = process.cwd()) {
   let dir = resolve(cwd);
   for (let i = 0; i < 8; i++) {
-    if (existsSync(join(dir, "pnpm-workspace.yaml")) && existsSync(join(dir, "suites"))) {
+    const hasCases = existsSync(join(dir, "cases")) || existsSync(join(dir, "suites"));
+    if (existsSync(join(dir, "pnpm-workspace.yaml")) && hasCases) {
       return dir;
     }
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
-  // Fallback: packages/runner/src -> ../../..
   return resolve(here, "../../..");
 }
 
-export function fixturesDir(root = repoRoot()) {
+export function startersDir(root = repoRoot()) {
+  const next = join(root, "starters");
+  if (existsSync(next)) return next;
   return join(root, "fixtures");
 }
 
-export function suitesDir(root = repoRoot()) {
+/** @deprecated use startersDir */
+export function fixturesDir(root = repoRoot()) {
+  return startersDir(root);
+}
+
+export function casesDir(root = repoRoot()) {
+  const next = join(root, "cases");
+  if (existsSync(next)) return next;
   return join(root, "suites");
+}
+
+/** @deprecated use casesDir */
+export function suitesDir(root = repoRoot()) {
+  return casesDir(root);
 }
 
 export function catalogPath(root = repoRoot()) {

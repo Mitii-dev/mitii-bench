@@ -1,0 +1,34 @@
+id: "frontend-rhf-zod-profile"
+title: "React Hook Form + Zod Resolver"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "react-hook-form"
+  - "zod"
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "react-hook-form"
+  - "zod"
+  - "forms"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"zod-error-list\""
+  - contains:
+      file: "src/App.jsx"
+      text: "react-hook-form"
+  - contains:
+      file: "src/App.jsx"
+      text: "zod"
+  - contains:
+      file: "src/App.jsx"
+      text: "zodResolver"

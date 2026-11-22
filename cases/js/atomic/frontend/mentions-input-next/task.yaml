@@ -1,0 +1,38 @@
+id: "frontend-mentions-input-next"
+title: "Mentions Input Field (@username)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "mentions"
+  - "autocomplete"
+  - "textarea"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"mention-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"mention-dropdown\""
+  - contains:
+      file: "app/page.jsx"
+      text: "@"
+  - contains:
+      file: "app/page.jsx"
+      text: "mention-dropdown"
+  - contains:
+      file: "app/page.jsx"
+      text: "USERS"

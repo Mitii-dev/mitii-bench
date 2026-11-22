@@ -1,0 +1,41 @@
+id: "frontend-toast-system-react"
+title: "Toast Notification System"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "toast"
+  - "notifications"
+  - "feedback"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"btn-toast-success\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"btn-toast-error\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"toast-container\""
+  - contains:
+      file: "src/App.jsx"
+      text: "Success"
+  - contains:
+      file: "src/App.jsx"
+      text: "Error"
+  - contains:
+      file: "src/App.jsx"
+      text: "setTimeout"

@@ -1,0 +1,35 @@
+id: "frontend-antd-form-validation"
+title: "Ant Design (antd): Form Validation"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "antd"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "antd"
+  - "forms"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"antd-form\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"antd-submit\""
+  - contains:
+      file: "src/App.jsx"
+      text: "antd"
+  - contains:
+      file: "src/App.jsx"
+      text: "Form"
+  - contains:
+      file: "src/App.jsx"
+      text: "rules"

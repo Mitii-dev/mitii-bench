@@ -1,0 +1,28 @@
+id: "backend-stream-csv-to-jsonl"
+title: "Stream Parsing & Memory Efficiency"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "hard"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "core"
+  - "vanilla"
+  - "node-core"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/csvTransform.js"
+      text: "Transform"
+  - contains:
+      file: "src/csvTransform.js"
+      text: "Jsonl"

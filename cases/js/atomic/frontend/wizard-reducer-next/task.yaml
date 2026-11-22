@@ -1,0 +1,44 @@
+id: "frontend-wizard-reducer-next"
+title: "useReducer for Complex State"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useReducer"
+  - "wizard"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"step-display\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"next-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"prev-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "useReducer"
+  - contains:
+      file: "app/page.jsx"
+      text: "NEXT_STEP"
+  - contains:
+      file: "app/page.jsx"
+      text: "PREV_STEP"
+  - contains:
+      file: "app/page.jsx"
+      text: "RESET"

@@ -1,0 +1,34 @@
+id: "frontend-formik-yup-checkout"
+title: "Formik + Yup: Multi-Field Form"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "formik"
+  - "yup"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "formik"
+  - "yup"
+  - "forms"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"zip-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "formik"
+  - contains:
+      file: "src/App.jsx"
+      text: "yup"
+  - contains:
+      file: "src/App.jsx"
+      text: "Formik"

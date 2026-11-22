@@ -1,9 +1,0 @@
-- contains:
-    file: src/passwordReset.js
-    text: "reset"
-- contains:
-    file: src/passwordReset.js
-    text: "token"
-- contains:
-    file: src/passwordReset.js
-    text: "createHash"

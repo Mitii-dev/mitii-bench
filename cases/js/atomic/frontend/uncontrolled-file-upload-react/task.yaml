@@ -1,0 +1,38 @@
+id: "frontend-uncontrolled-file-upload-react"
+title: "Uncontrolled Components with useRef"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useRef"
+  - "uncontrolled"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"file-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"upload-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"file-name-display\""
+  - contains:
+      file: "src/App.jsx"
+      text: "fileInputRef"
+  - contains:
+      file: "src/App.jsx"
+      text: "files?.[0]"

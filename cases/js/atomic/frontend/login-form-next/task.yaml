@@ -1,0 +1,45 @@
+id: "frontend-login-form-next"
+title: "Controlled Inputs & Form State"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "forms"
+  - "controlled-inputs"
+  - "react-tasks"
+  - "vanilla"
+  - "smoke"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"login-form\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"email-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"password-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"submit-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"form-status\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Welcome,"
+  - contains:
+      file: "app/page.jsx"
+      text: "Please fill all fields"

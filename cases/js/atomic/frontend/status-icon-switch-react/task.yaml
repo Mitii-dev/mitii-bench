@@ -1,0 +1,34 @@
+id: "frontend-status-icon-switch-react"
+title: "Dynamic Component Rendering"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "dynamic-components"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"status-icon\""
+  - contains:
+      file: "src/App.jsx"
+      text: "success"
+  - contains:
+      file: "src/App.jsx"
+      text: "warning"
+  - contains:
+      file: "src/App.jsx"
+      text: "error"

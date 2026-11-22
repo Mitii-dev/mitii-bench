@@ -2,61 +2,50 @@
 
 Open-source Mitii coding-agent evaluation benchmark.
 
-## Layout (language-first)
+## Layout
 
 ```text
-suites/
-  js/atomic/…          # JavaScript / TypeScript cases
-  python/atomic/…      # Python later (isolated tree)
-fixtures/
-  js/base-react-js/…
-  python/              # reserved
-catalog/               # AUTO-GENERATED (gitignored)
+cases/                      # exam questions (task.yaml + prompt.md + tests/)
+starters/                   # blank projects (pnpm starters:install)
+packages/
+  schema/ checks/ runner/ adapters/mitii/
 ```
 
-Python will not dump into the same `atomic/` as JS — each ecosystem has its own tree.
+**One case folder = one starter.** React and Next are separate cases.
 
-## Quick start
+## Quick start (no LLM)
 
 ```bash
-pnpm install              # also regenerates catalog/
-pnpm fixtures:install
-pnpm case:validate        # regenerates catalog/catalog.json + cases.html
+pnpm install
+pnpm starters:install
+pnpm case:validate
 pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke
 pnpm cases:open
 ```
 
-## Frontend corpus
+## Agent runs (needs Mitii)
 
-~100 React prompts from `references/react-tasks.md` are under `suites/js/atomic/frontend/`:
+```bash
+export MITII_BIN=/path/to/Mitii/apps/cli/bin/mitii.js   # or put `mitii` on PATH
+# API keys in the environment — not in runner.config.json
+mitii setup --provider anthropic --yes --global
 
-- **Vanilla** (core + real-world widgets): matrix on `base-react-js` + `base-next-js`, with dry-run solutions **and Vitest/RTL behavioral oracles**
-- **Ecosystem libs** (MUI, Redux, RHF, …): React-first scaffolds (`ecosystem-lib`); agent installs packages
-- **Skipped**: React Native Paper (not a web fixture)
-- **Next routing**: parallel App Router cases with solutions (`frontend-next-*`)
+pnpm preflight          # version + setup --show + doctor
+pnpm bench <case-id>    # Mitii agent --autonomy apply, then checks
+```
 
-Details: [docs/REACT_TASKS.md](./docs/REACT_TASKS.md) · [docs/UI_ORACLES.md](./docs/UI_ORACLES.md).
+Local path tip: copy `runner.config.example.json` → `runner.config.local.json` (gitignored) and set `mitiiBin`.
 
-## Backend corpus
+Details: [docs/RUNNING_MITII.md](./docs/RUNNING_MITII.md) · [docs/AUTHORING.md](./docs/AUTHORING.md) · [docs/CHECKS.md](./docs/CHECKS.md)
 
-~100 Node.js prompts from `references/node-tasks.md` are under `suites/js/atomic/backend/`:
+## Corpora
 
-- **Core (1–25)**: `base-node` vanilla modules/APIs; smoke subset ships dry-run solutions + `node:test` oracles
-- **Ecosystem (26–55)**: Express/Prisma/Socket/Bull/Fastify/Nest/… scaffolds (`ecosystem-lib`); NestJS on `base-nest-js`
-- **Real-world (56–100)**: production-style API/ops tasks on `base-node`
-
-Details: [docs/NODE_TASKS.md](./docs/NODE_TASKS.md).
-
-## Grading & dry-run
-
-**Dry-run applies `resources/solution/`, then runs grades** (no LLM).  
-**Agent runs never compare to the solution** — only grades decide pass/fail.
-
-Full explanation: [docs/GRADING_AND_DRY_RUN.md](./docs/GRADING_AND_DRY_RUN.md).
+- Frontend: [docs/REACT_TASKS.md](./docs/REACT_TASKS.md)
+- Backend: [docs/NODE_TASKS.md](./docs/NODE_TASKS.md)
 
 ## Contribute
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) and [suites/README.md](./suites/README.md).
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 

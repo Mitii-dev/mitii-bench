@@ -34,6 +34,6 @@ jobs:
         working-directory: mitii-bench
         run: |
           pnpm install
-          pnpm fixtures:install
+          pnpm starters:install
           pnpm case:validate
           pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke

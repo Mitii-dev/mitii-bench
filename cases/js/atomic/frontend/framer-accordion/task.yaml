@@ -1,0 +1,35 @@
+id: "frontend-framer-accordion"
+title: "Framer Motion: Animate Presence & Toggle"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "framer-motion"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "framer-motion"
+  - "animation"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"accordion-toggle\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"motion-panel\""
+  - contains:
+      file: "src/App.jsx"
+      text: "framer-motion"
+  - contains:
+      file: "src/App.jsx"
+      text: "AnimatePresence"
+  - contains:
+      file: "src/App.jsx"
+      text: "motion"

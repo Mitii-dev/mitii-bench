@@ -1,0 +1,34 @@
+id: "backend-env-config-validator"
+title: "Environment Config with Envalid / Zod"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "zod"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "zod"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/config.js"
+      text: "DATABASE_URL"
+  - contains:
+      file: "src/config.js"
+      text: "PORT"
+  - contains:
+      file: "src/config.js"
+      text: "process.env"

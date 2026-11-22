@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { compileGrade } from "../src/grade-compiler.js";
+import { compileChecks } from "@mitii-bench/checks";
 
 test("compiles contains + build and injects defaults", () => {
-  const checks = compileGrade([
+  const checks = compileChecks([
     { contains: { file: "src/App.jsx", text: "Docs" } },
     { build: true },
   ]);
@@ -14,15 +14,15 @@ test("compiles contains + build and injects defaults", () => {
 });
 
 test("honors workspace_changed: false", () => {
-  const checks = compileGrade([{ workspace_changed: false }, { build: true }]);
+  const checks = compileChecks([{ workspace_changed: false }, { build: true }]);
   assert.ok(checks.some((c) => c.type === "workspace_unchanged"));
   assert.ok(!checks.some((c) => c.type === "workspace_changed"));
 });
 
-test("compiles package_deps and api_oracle", () => {
-  const checks = compileGrade([
+test("compiles package_deps and test", () => {
+  const checks = compileChecks([
     { package_deps: { packages: ["zod", "multer"] } },
-    { api_oracle: true },
+    { test: { command: "MITII_NO_LISTEN=1 node --test tests/api.test.js" } },
     { build: true },
   ]);
   const pkg = checks.find((c) => c.type === "package_deps");
@@ -32,7 +32,7 @@ test("compiles package_deps and api_oracle", () => {
     checks.some(
       (c) =>
         c.type === "command" &&
-        c.command === "MITII_NO_LISTEN=1 node --test test/oracle.test.js",
+        c.command === "MITII_NO_LISTEN=1 node --test tests/api.test.js",
     ),
   );
 });

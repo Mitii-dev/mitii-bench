@@ -1,0 +1,41 @@
+id: "backend-graphql-complexity-limit"
+title: "GraphQL Query Depth & Complexity Limiter"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "ecosystem-lib"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "complexity"
+  - contains:
+      file: "src/index.js"
+      text: "depth"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/graphql"
+          json:
+            query: "{ user { id name } }"
+          expect:
+            status: 200
+            jsonPaths:
+              - "data"

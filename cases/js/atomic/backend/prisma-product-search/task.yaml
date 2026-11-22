@@ -1,0 +1,36 @@
+id: "backend-prisma-product-search"
+title: "Prisma Pagination & Filtering"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "prisma"
+  - "@prisma/client"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "prisma"
+        - "@prisma/client"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/productSearch.js"
+      text: "totalCount"
+  - contains:
+      file: "src/productSearch.js"
+      text: "totalPages"
+  - contains:
+      file: "src/productSearch.js"
+      text: "page"

@@ -1,0 +1,35 @@
+id: "frontend-lazy-suspense-tabs-next"
+title: "React.lazy & Suspense"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "lazy"
+  - "suspense"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"suspense-fallback\""
+  - contains:
+      file: "app/page.jsx"
+      text: "lazy("
+  - contains:
+      file: "app/page.jsx"
+      text: "Suspense"
+  - contains:
+      file: "app/page.jsx"
+      text: "Loading module..."

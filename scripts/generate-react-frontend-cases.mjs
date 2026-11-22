@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 /**
- * Materialize references/react-tasks.md into suites/js/atomic/frontend/* cases.
- *
- * Vanilla cases (core + real-world): React + Next matrix with solutions + grades.
- * Library cases: React-first scaffolds (packages tagged); Next-native routing variants.
- * Skips site-nav-pages (prompt #100, already present).
- * Skips React Native Paper (prompt #31, not a web fixture).
+ * Materialize references/react-tasks.md into cases/js/atomic/frontend/* .
+ * Vanilla: separate react + next case folders (one starter each).
+ * Library: single-starter scaffolds.
  */
 import { mkdirSync, writeFileSync, existsSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -20,11 +17,16 @@ const ORACLES = { ...coreOracles, ...realworldOracles };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const frontendRoot = join(root, "suites", "js", "atomic", "frontend");
+const frontendRoot = join(root, "cases", "js", "atomic", "frontend");
 
 const FORCE = process.argv.includes("--force");
 const VANILLA_ONLY = process.argv.includes("--vanilla-only");
 const LIB_ONLY = process.argv.includes("--lib-only");
+
+const STARTER_MAP = {
+  "base-react-js": "react-js",
+  "base-next-js": "next-js",
+};
 
 function yamlQuote(s) {
   return JSON.stringify(s);
@@ -51,9 +53,8 @@ function toNextExtraPath(relPath) {
   return relPath;
 }
 
-function toNextOracle(reactOracle) {
-  // Use .jsx so Vitest parses JSX without Next's SWC pipeline.
-  return reactOracle
+function toNextTest(reactTest) {
+  return reactTest
     .replaceAll('from "../src/App.jsx"', 'from "../app/page.jsx"')
     .replaceAll("from '../src/App.jsx'", "from '../app/page.jsx'")
     .replace(/import\s*\{\s*App\s*\}\s*from/g, "import Page from")
@@ -66,7 +67,7 @@ function rewriteImportsForNext(source, extraFiles = {}) {
   let out = source;
   for (const rel of Object.keys(extraFiles)) {
     if (!rel.startsWith("src/")) continue;
-    const name = rel.slice(4); // e.g. Overview.jsx
+    const name = rel.slice(4);
     const nextFrom = `../components/${name}`;
     out = out
       .replaceAll(`from "./${name}"`, `from "${nextFrom}"`)
@@ -77,50 +78,47 @@ function rewriteImportsForNext(source, extraFiles = {}) {
   return out;
 }
 
-/** Dynamic testids like todo-check-[id] are stored as prefixes ending in "-". */
 function gradeTextForTestid(id) {
   if (id.endsWith("-") || id.includes("[") || id.includes("*")) {
-    const prefix = id.replace(/\[.*?\]/g, "").replace(/\*/g, "");
-    return prefix;
+    return id.replace(/\[.*?\]/g, "").replace(/\*/g, "");
   }
   return `data-testid="${id}"`;
 }
 
-function gradeYaml(file, testids, markers) {
+function containsChecks(file, testids, markers) {
   const lines = [];
   const seen = new Set();
   for (const id of testids) {
     const text = gradeTextForTestid(id);
     if (seen.has(text)) continue;
     seen.add(text);
-    lines.push("- contains:");
-    lines.push(`    file: ${file}`);
-    lines.push(`    text: ${yamlQuote(text)}`);
+    lines.push("  - contains:");
+    lines.push(`      file: ${file}`);
+    lines.push(`      text: ${yamlQuote(text)}`);
   }
   for (const m of markers ?? []) {
     if (seen.has(m)) continue;
     seen.add(m);
-    lines.push("- contains:");
-    lines.push(`    file: ${file}`);
-    lines.push(`    text: ${yamlQuote(m)}`);
+    lines.push("  - contains:");
+    lines.push(`      file: ${file}`);
+    lines.push(`      text: ${yamlQuote(m)}`);
   }
-  return `${lines.join("\n")}\n`;
+  return lines.join("\n");
 }
 
-/** Explicit multi-file grade asserts: [{ contains: { file, text } } | { exists: { file } }] */
-function gradeFromAsserts(asserts) {
+function checksFromAsserts(asserts) {
   const lines = [];
   for (const item of asserts) {
     if (item.contains) {
-      lines.push("- contains:");
-      lines.push(`    file: ${item.contains.file}`);
-      lines.push(`    text: ${yamlQuote(item.contains.text)}`);
+      lines.push("  - contains:");
+      lines.push(`      file: ${item.contains.file}`);
+      lines.push(`      text: ${yamlQuote(item.contains.text)}`);
     } else if (item.exists) {
-      lines.push("- exists:");
-      lines.push(`    file: ${item.exists.file}`);
+      lines.push("  - exists:");
+      lines.push(`      file: ${item.exists.file}`);
     }
   }
-  return `${lines.join("\n")}\n`;
+  return lines.join("\n");
 }
 
 function writeCaseDir(caseDir, files) {
@@ -139,10 +137,9 @@ function writeCaseDir(caseDir, files) {
   return true;
 }
 
-function materializeVanilla(c) {
-  const bases = ["base-react-js", "base-next-js"];
-  const id = `frontend-${c.slug}`;
-  const caseDir = join(frontendRoot, c.slug);
+function materializeVanillaVariant(c, { suffix, starter, entryFile, promptHint, solutionFiles, testBody }) {
+  const id = `frontend-${c.slug}-${suffix}`;
+  const caseDir = join(frontendRoot, `${c.slug}-${suffix}`);
   const smokeSlugs = new Set([
     "counter-state",
     "login-form",
@@ -158,14 +155,13 @@ function materializeVanilla(c) {
       ...(smokeSlugs.has(c.slug) ? ["smoke"] : []),
     ]),
   ];
+  const hasTest = Boolean(testBody);
+  const contains = containsChecks(entryFile, c.testids, c.markers);
 
-  const hasOracle = Boolean(ORACLES[c.slug]);
   const taskYaml = `id: ${id}
 title: ${yamlQuote(c.title)}
 ecosystem: js
-bases:
-  - base-react-js
-  - base-next-js
+starter: ${starter}
 family: frontend
 packages: []
 difficulty: ${c.difficulty}
@@ -173,18 +169,18 @@ category: frontend
 language: javascript
 tags: [${tags.map((t) => yamlQuote(t)).join(", ")}]
 timeoutSec: 300
-promptFile: spec.md
+promptFile: prompt.md
 readmeFile: README.md
-grade:
+checks:
   - build: true
 ${
-  hasOracle
-    ? `  - ui_oracle:
-      command: "npm test -- __bench__/ui.oracle.test.jsx"
+  hasTest
+    ? `  - test:
+      command: "npm test -- tests/ui.test.jsx"
       timeoutMs: 60000
 `
     : ""
-}`;
+}${contains ? `${contains}\n` : ""}`;
 
   const readme = `# ${c.title}
 
@@ -192,76 +188,84 @@ ${
 
 ${c.prompt.split("\n")[0]}
 
-## Ecosystem
+## Starter
 
-\`js\` — matrix on React (Vite) and Next.js App Router.
-
-## Bases
-
-| Base | Approach |
-|---|---|
-| \`base-react-js\` | Client UI in \`src/App.jsx\` |
-| \`base-next-js\` | Client page in \`app/page.jsx\` (\`"use client"\`) |
+\`${starter}\`
 
 \`\`\`bash
 pnpm case:dry-run ${id}
-pnpm case:dry-run ${id}@base-react-js
 \`\`\`
 
-## How we grade
+## How we check
 
-- Shared: \`npm run build\`
-- Shared: Vitest + Testing Library \`ui_oracle\` (behavioral; agent-hidden under \`resources/oracle/\`)
-- Per-base: \`data-testid\` / marker asserts in source
-- \`resources/solution/\` is dry-run only
+- \`npm run build\`
+${hasTest ? "- Hidden \`tests/ui.test.jsx\` (Vitest + Testing Library)\n" : ""}- \`contains\` markers in source
+- \`solution/\` is dry-run only
 
-Source: \`references/react-tasks.md\` (vanilla React — no extra packages).
+Source: \`references/react-tasks.md\`.
 `;
 
-  const nextPage = rewriteImportsForNext(
-    toNextPage(c.reactSolution),
-    c.reactExtraFiles ?? {},
-  );
+  let promptBody = c.prompt.trim();
+  if (!promptBody.includes(promptHint)) {
+    promptBody = `${promptBody}\n\n${promptHint}`;
+  }
+
   const files = {
     "task.yaml": taskYaml,
-    "spec.md": `${c.prompt.trim()}\n`,
+    "prompt.md": `${promptBody}\n`,
     "README.md": readme,
-    "grade/base-react-js.yaml": gradeYaml("src/App.jsx", c.testids, c.markers),
-    "grade/base-next-js.yaml": gradeYaml("app/page.jsx", c.testids, c.markers),
-    "resources/solution/base-react-js/src/App.jsx": c.reactSolution,
-    "resources/solution/base-next-js/app/page.jsx": nextPage,
   };
+  for (const [rel, content] of Object.entries(solutionFiles)) {
+    files[`solution/${rel}`] = content;
+  }
+  if (hasTest) {
+    files["tests/ui.test.jsx"] = testBody.endsWith("\n") ? testBody : `${testBody}\n`;
+  }
 
-  if (hasOracle) {
-    const reactOracle = ORACLES[c.slug].endsWith("\n")
+  const wrote = writeCaseDir(caseDir, files);
+  return { id, starter, wrote, kind: "vanilla" };
+}
+
+function materializeVanilla(c) {
+  const results = [];
+  const reactOracle = ORACLES[c.slug]
+    ? ORACLES[c.slug].endsWith("\n")
       ? ORACLES[c.slug]
-      : `${ORACLES[c.slug]}\n`;
-    files["resources/oracle/base-react-js/__bench__/ui.oracle.test.jsx"] = reactOracle;
-    files["resources/oracle/base-next-js/__bench__/ui.oracle.test.jsx"] =
-      toNextOracle(reactOracle);
-  }
+      : `${ORACLES[c.slug]}\n`
+    : null;
 
+  const reactExtras = {};
   for (const [rel, content] of Object.entries(c.reactExtraFiles ?? {})) {
-    files[`resources/solution/base-react-js/${rel}`] = content;
-    const nextRel = toNextExtraPath(rel);
-    if (nextRel) {
-      let nextContent = content;
-      if (nextRel.endsWith(".jsx") || nextRel.endsWith(".js")) {
-        if (!nextContent.includes("use client") && /export/.test(nextContent)) {
-          nextContent = `'use client';\n\n${nextContent}`;
-        }
-      }
-      files[`resources/solution/base-next-js/${nextRel}`] = nextContent;
-      // Grade that lazy child modules exist when provided
-      if (nextRel.startsWith("components/")) {
-        // already covered by page imports / testids
-      }
-    }
+    reactExtras[rel] = content;
   }
+  results.push(
+    materializeVanillaVariant(c, {
+      suffix: "react",
+      starter: "react-js",
+      entryFile: "src/App.jsx",
+      promptHint: "For `react-js`, implement the UI in `src/App.jsx`.",
+      solutionFiles: { "src/App.jsx": c.reactSolution, ...reactExtras },
+      testBody: reactOracle,
+    }),
+  );
 
-  // Portal case: Next needs modal-root in layout
+  const nextPage = rewriteImportsForNext(toNextPage(c.reactSolution), c.reactExtraFiles ?? {});
+  const nextExtras = {};
+  for (const [rel, content] of Object.entries(c.reactExtraFiles ?? {})) {
+    const nextRel = toNextExtraPath(rel);
+    if (!nextRel) continue;
+    let nextContent = content;
+    if (
+      (nextRel.endsWith(".jsx") || nextRel.endsWith(".js")) &&
+      !nextContent.includes("use client") &&
+      /export/.test(nextContent)
+    ) {
+      nextContent = `'use client';\n\n${nextContent}`;
+    }
+    nextExtras[nextRel] = nextContent;
+  }
   if (c.slug === "portal-tooltip") {
-    files["resources/solution/base-next-js/app/layout.js"] = `export const metadata = {
+    nextExtras["app/layout.js"] = `export const metadata = {
   title: "Portal Tooltip",
   description: "mitii-bench",
 };
@@ -279,37 +283,46 @@ export default function RootLayout({ children }) {
 `;
   }
 
-  // Base-tagged implement-here lines; runner shapePrompt keeps only the active base.
-  const baseHints = [
-    "For `base-react-js`, implement the UI in `src/App.jsx`.",
-    'For `base-next-js`, implement the UI in `app/page.jsx` as a client component (`"use client"`).',
-  ];
-  let promptBody = c.prompt.trim();
-  for (const hint of baseHints) {
-    if (!promptBody.includes(hint)) {
-      promptBody = `${promptBody}\n\n${hint}`;
-    }
-  }
-  files["spec.md"] = `${promptBody}\n`;
+  results.push(
+    materializeVanillaVariant(c, {
+      suffix: "next",
+      starter: "next-js",
+      entryFile: "app/page.jsx",
+      promptHint:
+        'For `next-js`, implement the UI in `app/page.jsx` as a client component (`"use client"`).',
+      solutionFiles: { "app/page.jsx": nextPage, ...nextExtras },
+      testBody: reactOracle ? toNextTest(reactOracle) : null,
+    }),
+  );
 
-  const wrote = writeCaseDir(caseDir, files);
-  return { id, bases, wrote, kind: "vanilla" };
+  return results;
 }
 
 function materializeLibrary(c) {
-  const bases = c.bases?.length ? c.bases : ["base-react-js"];
+  const legacyBases = c.bases?.length ? c.bases : ["base-react-js"];
+  const starter = STARTER_MAP[legacyBases[0]] ?? String(legacyBases[0]).replace(/^base-/, "");
+  const suffix =
+    starter === "react-js" ? null : starter === "next-js" ? null : null;
+  // Keep original slug for single-starter library cases (already unique)
   const id = `frontend-${c.slug}`;
   const caseDir = join(frontendRoot, c.slug);
   const tags = [
-    ...new Set([...(c.tags ?? []), "react-tasks", ...(c.packages?.length ? ["ecosystem-lib"] : [])]),
+    ...new Set([
+      ...(c.tags ?? []),
+      "react-tasks",
+      ...(c.packages?.length ? ["ecosystem-lib"] : []),
+    ]),
   ];
   const packages = c.packages ?? [];
+  const entryFile = starter === "next-js" ? "app/page.js" : "src/App.jsx";
+  const contains = c.gradeAsserts?.length
+    ? checksFromAsserts(c.gradeAsserts)
+    : containsChecks(entryFile, c.testids, c.markers);
 
   const taskYaml = `id: ${id}
 title: ${yamlQuote(c.title)}
 ecosystem: js
-bases:
-${bases.map((b) => `  - ${b}`).join("\n")}
+starter: ${starter}
 family: frontend
 packages: [${packages.map((p) => yamlQuote(p)).join(", ")}]
 difficulty: ${c.difficulty}
@@ -317,15 +330,11 @@ category: frontend
 language: javascript
 tags: [${tags.map((t) => yamlQuote(t)).join(", ")}]
 timeoutSec: 300
-promptFile: spec.md
+promptFile: prompt.md
 readmeFile: README.md
-grade:
+checks:
   - build: true
-`;
-
-  const primaryBase = bases[0];
-  const gradeFile =
-    primaryBase === "base-next-js" ? "app/page.js" : "src/App.jsx";
+${contains ? `${contains}\n` : ""}`;
 
   const readme = `# ${c.title}
 
@@ -333,28 +342,17 @@ grade:
 
 ${c.prompt.split("\n")[0]}
 
-## Ecosystem
+## Starter
 
-\`js\`
-
-## Bases
-
-${bases.map((b) => `- \`${b}\``).join("\n")}
+\`${starter}\`
 
 ## Packages
 
-${packages.length ? packages.map((p) => `- \`${p}\``).join("\n") : "_None (framework built-ins)._"}
-
-${
-  packages.length
-    ? `Install required libraries in the workspace before the app builds. Dry-run solutions are not shipped yet for ecosystem-lib cases — use agent evals.`
-    : `Vanilla Next.js App Router APIs (no extra packages).`
-}
+${packages.length ? packages.map((p) => `- \`${p}\``).join("\n") : "_None._"}
 
 \`\`\`bash
 pnpm case:validate
-# dry-run once resources/solution/${primaryBase}/ exists:
-# pnpm case:dry-run ${id}
+pnpm case:dry-run ${id}
 \`\`\`
 
 Source: \`references/react-tasks.md\`.
@@ -362,49 +360,39 @@ Source: \`references/react-tasks.md\`.
 
   const files = {
     "task.yaml": taskYaml,
-    "spec.md": `${c.prompt.trim()}\n`,
+    "prompt.md": `${c.prompt.trim()}\n`,
     "README.md": readme,
-    [`grade/${primaryBase}.yaml`]: c.gradeAsserts?.length
-      ? gradeFromAsserts(c.gradeAsserts)
-      : gradeYaml(gradeFile, c.testids, c.markers),
   };
-  for (const base of bases) {
-    if (c.solutionFiles && Object.keys(c.solutionFiles).length > 0) {
-      for (const [rel, content] of Object.entries(c.solutionFiles)) {
-        files[`resources/solution/${base}/${rel}`] = content;
-      }
-    } else {
-      files[`resources/solution/${base}/.gitkeep`] = "";
+  if (c.solutionFiles && Object.keys(c.solutionFiles).length > 0) {
+    for (const [rel, content] of Object.entries(c.solutionFiles)) {
+      files[`solution/${rel}`] = content;
     }
+  } else {
+    files["solution/.gitkeep"] = "";
   }
 
+  void suffix;
   const wrote = writeCaseDir(caseDir, files);
-  return { id, bases, wrote, kind: "library" };
+  return [{ id, starter, wrote, kind: "library" }];
 }
 
 function main() {
   const results = [];
   if (!LIB_ONLY) {
     for (const c of [...coreCases, ...realworldCases]) {
-      results.push(materializeVanilla(c));
+      results.push(...materializeVanilla(c));
     }
   }
   if (!VANILLA_ONLY) {
     for (const c of libraryCases) {
-      results.push(materializeLibrary(c));
+      results.push(...materializeLibrary(c));
     }
   }
 
   const wrote = results.filter((r) => r.wrote).length;
   const skipped = results.length - wrote;
   console.log(
-    `Materialized ${wrote} cases (${skipped} skipped). Vanilla+lib total defs: ${results.length}`,
-  );
-  console.log(
-    `Vanilla with solutions: ${results.filter((r) => r.kind === "vanilla" && r.wrote).length}`,
-  );
-  console.log(
-    `Library scaffolds: ${results.filter((r) => r.kind === "library" && r.wrote).length}`,
+    `Materialized ${wrote} cases (${skipped} skipped). Total defs: ${results.length}`,
   );
 }
 

@@ -1,0 +1,44 @@
+id: "frontend-react-router-basic-nav"
+title: "React Router v6: Basic Navigation"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "react-router"
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "react-router"
+  - "routing"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"link-home\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"link-dashboard\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"view-home\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"view-dashboard\""
+  - contains:
+      file: "src/App.jsx"
+      text: "react-router-dom"
+  - contains:
+      file: "src/App.jsx"
+      text: "Link"
+  - contains:
+      file: "src/App.jsx"
+      text: "Routes"
+  - contains:
+      file: "src/App.jsx"
+      text: "Route"

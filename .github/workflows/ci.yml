@@ -18,8 +18,8 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install
-      - run: pnpm fixtures:install
+      - run: pnpm starters:install
       - run: pnpm test
       - run: pnpm case:validate
-      - name: Dry-run smoke frontend matrix
+      - name: Dry-run smoke (no Mitii / no LLM)
         run: pnpm --filter @mitii-bench/runner bench --dryRun --tag=smoke

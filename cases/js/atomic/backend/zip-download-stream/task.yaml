@@ -1,0 +1,45 @@
+id: "backend-zip-download-stream"
+title: "File Compression & Zip Archiver Service"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "archiver"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "archiver"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "archiver"
+  - contains:
+      file: "src/index.js"
+      text: "download-zip"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/api/files/download-zip"
+          json:
+            files:
+              - "a.txt"
+          expect:
+            status: 200
+            headerContains:
+              content-type: "zip"

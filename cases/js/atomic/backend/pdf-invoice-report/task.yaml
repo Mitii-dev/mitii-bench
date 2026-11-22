@@ -1,0 +1,45 @@
+id: "backend-pdf-invoice-report"
+title: "PDF Report Generator Service"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "pdfkit"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "pdfkit"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "invoice-pdf"
+  - contains:
+      file: "src/index.js"
+      text: "pdf"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/api/reports/invoice-pdf"
+          json:
+            invoiceId: "X1"
+            total: 50
+          expect:
+            status: 200
+            headerContains:
+              content-type: "pdf"

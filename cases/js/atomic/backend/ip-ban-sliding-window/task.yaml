@@ -1,0 +1,41 @@
+id: "backend-ip-ban-sliding-window"
+title: "Sliding Window IP Banning System"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "401"
+  - contains:
+      file: "src/index.js"
+      text: "ban"
+  - contains:
+      file: "src/index.js"
+      text: "5"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/login"
+          json:
+            password: "bad"
+          expect:
+            status: 401

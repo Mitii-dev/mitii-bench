@@ -1,0 +1,38 @@
+id: "frontend-tag-chip-input-react"
+title: "Tag Input / Chip Creator Field"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "chips"
+  - "tags"
+  - "input"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"chip-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "chip-"
+  - contains:
+      file: "src/App.jsx"
+      text: "Enter"
+  - contains:
+      file: "src/App.jsx"
+      text: ","
+  - contains:
+      file: "src/App.jsx"
+      text: "X"

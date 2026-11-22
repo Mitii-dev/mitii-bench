@@ -1,0 +1,35 @@
+id: "frontend-star-rating-react"
+title: "Rating Component (Star Rating)"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "rating"
+  - "stars"
+  - "hover"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "star-"
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"selected-rating\""
+  - contains:
+      file: "src/App.jsx"
+      text: "selected-rating"
+  - contains:
+      file: "src/App.jsx"
+      text: "onMouseEnter"

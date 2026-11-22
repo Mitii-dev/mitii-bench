@@ -1,0 +1,36 @@
+id: "frontend-cookie-consent-next"
+title: "Cookie Consent Banner"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "cookies"
+  - "consent"
+  - "gdpr"
+  - "localStorage"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"cookie-banner\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"accept-cookies-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "cookies_accepted"
+  - contains:
+      file: "app/page.jsx"
+      text: "localStorage"

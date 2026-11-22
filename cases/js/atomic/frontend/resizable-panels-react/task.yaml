@@ -1,0 +1,41 @@
+id: "frontend-resizable-panels-react"
+title: "Split View / Resizable Panels"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "split"
+  - "resize"
+  - "panels"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"left-panel\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"right-panel\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"resize-handle\""
+  - contains:
+      file: "src/App.jsx"
+      text: "resize-handle"
+  - contains:
+      file: "src/App.jsx"
+      text: "onMouseDown"
+  - contains:
+      file: "src/App.jsx"
+      text: "width"

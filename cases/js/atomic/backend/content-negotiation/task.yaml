@@ -1,0 +1,30 @@
+id: "backend-content-negotiation"
+title: "Content Negotiation Middleware"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/contentNegotiation.js"
+      text: "Accept"
+  - contains:
+      file: "src/contentNegotiation.js"
+      text: "xml"
+  - contains:
+      file: "src/contentNegotiation.js"
+      text: "json"

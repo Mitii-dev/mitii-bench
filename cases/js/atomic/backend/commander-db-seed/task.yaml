@@ -1,0 +1,31 @@
+id: "backend-commander-db-seed"
+title: "Commander.js CLI Application"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "commander"
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "commander"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/cli.js"
+      text: "db:seed"
+  - contains:
+      file: "src/cli.js"
+      text: "commander"

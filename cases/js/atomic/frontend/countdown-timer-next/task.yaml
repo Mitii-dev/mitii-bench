@@ -1,0 +1,44 @@
+id: "frontend-countdown-timer-next"
+title: "Countdown Timer Widget"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "countdown"
+  - "timer"
+  - "event"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"countdown-display\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"event-launched-msg\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Days"
+  - contains:
+      file: "app/page.jsx"
+      text: "Hours"
+  - contains:
+      file: "app/page.jsx"
+      text: "Minutes"
+  - contains:
+      file: "app/page.jsx"
+      text: "Seconds"
+  - contains:
+      file: "app/page.jsx"
+      text: "launched"

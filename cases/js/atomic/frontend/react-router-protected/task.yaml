@@ -1,0 +1,39 @@
+id: "frontend-react-router-protected"
+title: "React Router v6: Protected Routes"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "react-router"
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "react-router"
+  - "routing"
+  - "auth"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"login-view\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"protected-view\""
+  - contains:
+      file: "src/App.jsx"
+      text: "react-router-dom"
+  - contains:
+      file: "src/App.jsx"
+      text: "Outlet"
+  - contains:
+      file: "src/App.jsx"
+      text: "Navigate"
+  - contains:
+      file: "src/App.jsx"
+      text: "RequireAuth"

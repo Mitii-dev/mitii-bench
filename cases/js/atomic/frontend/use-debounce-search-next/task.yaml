@@ -1,0 +1,35 @@
+id: "frontend-use-debounce-search-next"
+title: "Custom Hook (useDebounce)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "custom-hooks"
+  - "debounce"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"debounced-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"debounced-value\""
+  - contains:
+      file: "app/page.jsx"
+      text: "useDebounce"
+  - contains:
+      file: "app/page.jsx"
+      text: "500"

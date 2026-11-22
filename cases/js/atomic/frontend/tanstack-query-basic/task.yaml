@@ -1,0 +1,38 @@
+id: "frontend-tanstack-query-basic"
+title: "TanStack Query: Basic useQuery"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "tanstack-query"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "tanstack-query"
+  - "data-fetching"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"rq-loading\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"rq-data\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"rq-refetch-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "@tanstack/react-query"
+  - contains:
+      file: "src/App.jsx"
+      text: "useQuery"
+  - contains:
+      file: "src/App.jsx"
+      text: "QueryClientProvider"

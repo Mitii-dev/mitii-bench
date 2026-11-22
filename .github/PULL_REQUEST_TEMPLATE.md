@@ -4,9 +4,9 @@
 
 ## Checklist
 
-- [ ] Fixture chosen from the CONTRIBUTING table
-- [ ] Prompt states exact labels / routes / status codes being graded
+- [ ] Starter chosen from [docs/AUTHORING.md](../docs/AUTHORING.md)
+- [ ] Prompt states exact labels / routes / status codes being checked
 - [ ] `pnpm case:validate` passes
-- [ ] `pnpm case:dry-run <id>` passes (resources/solution provided)
+- [ ] `pnpm case:dry-run <id>` passes (`solution/` provided)
 - [ ] No secrets or private URLs
 - [ ] Searched for duplicates (`pnpm cases --search=…`)

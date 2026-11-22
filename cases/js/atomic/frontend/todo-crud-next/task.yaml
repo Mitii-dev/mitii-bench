@@ -1,0 +1,46 @@
+id: "frontend-todo-crud-next"
+title: "Todo List (CRUD Operations)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "todo"
+  - "crud"
+  - "forms"
+  - "list"
+  - "react-tasks"
+  - "vanilla"
+  - "smoke"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"todo-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"add-todo-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"todo-list\""
+  - contains:
+      file: "app/page.jsx"
+      text: "todo-check-"
+  - contains:
+      file: "app/page.jsx"
+      text: "todo-delete-"
+  - contains:
+      file: "app/page.jsx"
+      text: "onDoubleClick"
+  - contains:
+      file: "app/page.jsx"
+      text: "complete"

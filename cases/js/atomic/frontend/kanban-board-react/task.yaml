@@ -1,0 +1,41 @@
+id: "frontend-kanban-board-react"
+title: "Interactive Kanban Board"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "kanban"
+  - "board"
+  - "columns"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "task-card-"
+  - contains:
+      file: "src/App.jsx"
+      text: "To Do"
+  - contains:
+      file: "src/App.jsx"
+      text: "In Progress"
+  - contains:
+      file: "src/App.jsx"
+      text: "Done"
+  - contains:
+      file: "src/App.jsx"
+      text: "Move Left"
+  - contains:
+      file: "src/App.jsx"
+      text: "Move Right"

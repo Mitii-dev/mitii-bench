@@ -1,0 +1,41 @@
+id: "frontend-polling-status-react"
+title: "Polling Dashboard Widget"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "polling"
+  - "status"
+  - "interval"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"server-status\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"pause-polling-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "Healthy"
+  - contains:
+      file: "src/App.jsx"
+      text: "Unreachable"
+  - contains:
+      file: "src/App.jsx"
+      text: "5000"
+  - contains:
+      file: "src/App.jsx"
+      text: "pause"

@@ -1,6 +1,0 @@
-- contains:
-    file: src/payloadGuard.js
-    text: "Content-Length"
-- contains:
-    file: src/payloadGuard.js
-    text: "abort"

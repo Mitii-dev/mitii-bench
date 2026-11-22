@@ -1,0 +1,30 @@
+id: "frontend-react-router-params"
+title: "React Router v6: Dynamic URL Parameters"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "react-router"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "react-router"
+  - "routing"
+  - "params"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"product-detail\""
+  - contains:
+      file: "src/App.jsx"
+      text: "react-router-dom"
+  - contains:
+      file: "src/App.jsx"
+      text: "useParams"

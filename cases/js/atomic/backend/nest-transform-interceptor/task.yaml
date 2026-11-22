@@ -1,0 +1,32 @@
+id: "backend-nest-transform-interceptor"
+title: "NestJS Interceptor (Response Transformation)"
+ecosystem: "js"
+starter: "nest-js"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+  - "nestjs"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/interceptors/transform.interceptor.ts"
+      text: "NestInterceptor"
+  - contains:
+      file: "src/interceptors/transform.interceptor.ts"
+      text: "timestamp"
+  - contains:
+      file: "src/interceptors/transform.interceptor.ts"
+      text: "data"

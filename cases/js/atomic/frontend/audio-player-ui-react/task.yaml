@@ -1,0 +1,44 @@
+id: "frontend-audio-player-ui-react"
+title: "Audio Player UI"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "audio"
+  - "player"
+  - "controls"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"play-pause-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"audio-progress\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"time-display\""
+  - contains:
+      file: "src/App.jsx"
+      text: "Play"
+  - contains:
+      file: "src/App.jsx"
+      text: "Pause"
+  - contains:
+      file: "src/App.jsx"
+      text: "progress"
+  - contains:
+      file: "src/App.jsx"
+      text: "padStart"

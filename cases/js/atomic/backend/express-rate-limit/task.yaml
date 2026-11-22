@@ -1,0 +1,69 @@
+id: "backend-express-rate-limit"
+title: "Express Rate Limiting Middleware"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "ecosystem"
+  - "ecosystem-lib"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/rateLimit.js"
+      text: "X-RateLimit-Limit"
+  - contains:
+      file: "src/rateLimit.js"
+      text: "Retry-After"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "GET"
+          path: "/ping"
+          expect:
+            status: 200
+            headerContains:
+              x-ratelimit-limit: "5"
+        - method: "GET"
+          path: "/ping"
+          expect:
+            status: 200
+            headerContains:
+              x-ratelimit-limit: "5"
+        - method: "GET"
+          path: "/ping"
+          expect:
+            status: 200
+            headerContains:
+              x-ratelimit-limit: "5"
+        - method: "GET"
+          path: "/ping"
+          expect:
+            status: 200
+            headerContains:
+              x-ratelimit-limit: "5"
+        - method: "GET"
+          path: "/ping"
+          expect:
+            status: 200
+            headerContains:
+              x-ratelimit-limit: "5"
+        - method: "GET"
+          path: "/ping"
+          expect:
+            status: 429
+            headerContains:
+              x-ratelimit-remaining: "0"

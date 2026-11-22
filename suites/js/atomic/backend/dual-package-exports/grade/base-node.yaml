@@ -1,6 +1,0 @@
-- contains:
-    file: package.json
-    text: "formatCurrency"
-- contains:
-    file: package.json
-    text: "exports"

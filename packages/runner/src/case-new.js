@@ -1,16 +1,16 @@
 import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { join } from "node:path";
-import { listFixtures } from "./loader.js";
-import { repoRoot, suitesDir } from "./paths.js";
+import { listStarters } from "./loader.js";
+import { repoRoot, casesDir } from "./paths.js";
 
-const FAMILY_DEFAULT_BASES = {
-  frontend: "base-react-js",
-  api: "base-node",
-  fullstack: "base-node",
-  repair: "base-ts-lib",
-  migration: "base-next-js",
-  project: "base-node",
+const FAMILY_DEFAULT_STARTERS = {
+  frontend: "react-js",
+  api: "node",
+  fullstack: "node",
+  repair: "ts-lib",
+  migration: "next-js",
+  project: "node",
 };
 
 export async function caseNew(flags = {}) {
@@ -18,7 +18,7 @@ export async function caseNew(flags = {}) {
   const ecosystem =
     flags.ecosystem ??
     (flags.lang === "python" || flags.language === "python" ? "python" : "js");
-  const fixtures = listFixtures(root, ecosystem).filter((f) => f.startsWith("base-"));
+  const starters = listStarters(root, ecosystem);
   const interactive = !flags.nonInteractive && !flags.category && !flags.slug;
   const ask = interactive ? makeAsk() : null;
 
@@ -36,17 +36,15 @@ export async function caseNew(flags = {}) {
   const slug =
     flags.slug ??
     (ask ? await ask("Slug (kebab-case)", "my-new-case") : "my-new-case");
-  const suggested = FAMILY_DEFAULT_BASES[family] ?? fixtures[0] ?? "base-react-js";
-  const basesRaw =
-    flags.bases ??
+  const suggested = FAMILY_DEFAULT_STARTERS[family] ?? starters[0] ?? "react-js";
+  const starterRaw =
+    flags.starter ??
+    flags.base ??
     flags.fixture ??
     (ask
-      ? await ask(`Bases (comma-separated) [${fixtures.join(", ")}]`, suggested)
+      ? await ask(`Starter [${starters.join(", ")}]`, suggested)
       : suggested);
-  const bases = String(basesRaw)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const starter = String(starterRaw).split(",")[0].trim();
   const difficulty =
     flags.difficulty ??
     (ask ? await ask("Difficulty [easy/medium/hard]", "easy") : "easy");
@@ -60,22 +58,18 @@ export async function caseNew(flags = {}) {
       : "Describe the task for the agent.");
 
   const id = flags.id ?? `${category}-${slug}`;
-  const caseDir = join(suitesDir(root), eco, "atomic", category, slug);
+  const caseDir = join(casesDir(root), eco, "atomic", category, slug);
   if (existsSync(join(caseDir, "task.yaml"))) {
     throw new Error(`Case already exists: ${caseDir}`);
   }
 
-  mkdirSync(join(caseDir, "resources"), { recursive: true });
-  for (const base of bases) {
-    mkdirSync(join(caseDir, "resources", "solution", base), { recursive: true });
-  }
-  // Do NOT create empty grade/*.yaml stubs — add grade/<base>.yaml only when needed.
+  mkdirSync(join(caseDir, "solution"), { recursive: true });
+  mkdirSync(join(caseDir, "tests"), { recursive: true });
 
   const yaml = `id: ${id}
 title: ${JSON.stringify(title)}
 ecosystem: ${eco}
-bases:
-${bases.map((b) => `  - ${b}`).join("\n")}
+starter: ${starter}
 family: ${family}
 packages: []
 difficulty: ${difficulty}
@@ -83,14 +77,14 @@ category: ${category}
 language: ${eco === "python" ? "python" : "javascript"}
 tags: [${category}]
 timeoutSec: 300
-promptFile: spec.md
+promptFile: prompt.md
 readmeFile: README.md
-grade:
+checks:
   - build: true
 `;
 
   writeFileSync(join(caseDir, "task.yaml"), yaml);
-  writeFileSync(join(caseDir, "spec.md"), `${prompt}\n`);
+  writeFileSync(join(caseDir, "prompt.md"), `${prompt}\n`);
   writeFileSync(
     join(caseDir, "README.md"),
     `# ${title}
@@ -103,13 +97,13 @@ ${prompt}
 
 \`${eco}\`
 
-## Bases
+## Starter
 
-${bases.map((b) => `- \`${b}\``).join("\n")}
+\`${starter}\`
 
-## How we grade
+## How we check
 
-Shared recipes in \`task.yaml\`. Optional per-base file: \`grade/<base>.yaml\` (create only when paths differ).
+Recipes in \`task.yaml\` under \`checks:\`. Hidden tests live in \`tests/\` (injected only at check time).
 
 ## Local verify
 
@@ -125,7 +119,7 @@ pnpm case:dry-run ${id}
   return {
     id,
     caseDir,
-    message: `Created ${caseDir}\nNext: edit spec.md, add grade/<base>.yaml if needed, add resources/solution/<base>/, then:\n  pnpm case:validate\n  pnpm case:dry-run ${id}`,
+    message: `Created ${caseDir}\nNext: edit prompt.md, add checks:, add tests/ and solution/, then:\n  pnpm case:validate\n  pnpm case:dry-run ${id}`,
   };
 }
 

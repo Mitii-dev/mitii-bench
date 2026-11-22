@@ -1,0 +1,33 @@
+id: "frontend-react-router-search-params"
+title: "React Router v6: Query String Parameters"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "react-router"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "react-router"
+  - "routing"
+  - "search-params"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"query-input\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"search-results\""
+  - contains:
+      file: "src/App.jsx"
+      text: "react-router-dom"
+  - contains:
+      file: "src/App.jsx"
+      text: "useSearchParams"

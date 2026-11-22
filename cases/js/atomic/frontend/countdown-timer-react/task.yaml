@@ -1,0 +1,44 @@
+id: "frontend-countdown-timer-react"
+title: "Countdown Timer Widget"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "countdown"
+  - "timer"
+  - "event"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"countdown-display\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"event-launched-msg\""
+  - contains:
+      file: "src/App.jsx"
+      text: "Days"
+  - contains:
+      file: "src/App.jsx"
+      text: "Hours"
+  - contains:
+      file: "src/App.jsx"
+      text: "Minutes"
+  - contains:
+      file: "src/App.jsx"
+      text: "Seconds"
+  - contains:
+      file: "src/App.jsx"
+      text: "launched"

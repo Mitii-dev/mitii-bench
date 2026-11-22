@@ -37,7 +37,7 @@ export function generateCasesBrowser(root = repoRoot()) {
       <option>easy</option><option>medium</option><option>hard</option>
     </select>
     <select id="ecosystem"><option value="">All ecosystems</option></select>
-    <select id="base"><option value="">All bases</option></select>
+    <select id="base"><option value="">All starters</option></select>
     <select id="family"><option value="">All families</option></select>
   </div>
   <table>

@@ -1,0 +1,41 @@
+id: "frontend-auth-context-next"
+title: "Context API (User Auth State)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "context"
+  - "auth"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"login-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"logout-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"user-greeting\""
+  - contains:
+      file: "app/page.jsx"
+      text: "AuthContext"
+  - contains:
+      file: "app/page.jsx"
+      text: "isAuthenticated"
+  - contains:
+      file: "app/page.jsx"
+      text: "Logged in as"

@@ -1,9 +1,0 @@
-- contains:
-    file: src/config.js
-    text: "DATABASE_URL"
-- contains:
-    file: src/config.js
-    text: "PORT"
-- contains:
-    file: src/config.js
-    text: "process.env"

@@ -1,0 +1,35 @@
+id: "frontend-portal-tooltip-react"
+title: "Portals (React.createPortal)"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "portals"
+  - "createPortal"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"tooltip-target\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"portal-tooltip\""
+  - contains:
+      file: "src/App.jsx"
+      text: "createPortal"
+  - contains:
+      file: "src/App.jsx"
+      text: "modal-root"

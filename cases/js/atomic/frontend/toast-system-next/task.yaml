@@ -1,0 +1,41 @@
+id: "frontend-toast-system-next"
+title: "Toast Notification System"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "toast"
+  - "notifications"
+  - "feedback"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"btn-toast-success\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"btn-toast-error\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"toast-container\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Success"
+  - contains:
+      file: "app/page.jsx"
+      text: "Error"
+  - contains:
+      file: "app/page.jsx"
+      text: "setTimeout"

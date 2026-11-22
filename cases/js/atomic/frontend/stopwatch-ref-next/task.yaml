@@ -1,0 +1,41 @@
+id: "frontend-stopwatch-ref-next"
+title: "useRef for Mutable Values (Stopwatch)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useRef"
+  - "timer"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"timer-display\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"start-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"stop-btn\""
+  - contains:
+      file: "app/page.jsx"
+      text: "useRef"
+  - contains:
+      file: "app/page.jsx"
+      text: "setInterval"
+  - contains:
+      file: "app/page.jsx"
+      text: "clearInterval"

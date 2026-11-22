@@ -1,0 +1,38 @@
+id: "frontend-image-zoomer-react"
+title: "Interactive Product Image Zoomer"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "zoom"
+  - "image"
+  - "ecommerce"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"product-image\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"zoom-preview\""
+  - contains:
+      file: "src/App.jsx"
+      text: "backgroundPosition"
+  - contains:
+      file: "src/App.jsx"
+      text: "backgroundSize"
+  - contains:
+      file: "src/App.jsx"
+      text: "onMouseMove"

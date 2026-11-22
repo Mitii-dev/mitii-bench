@@ -1,0 +1,42 @@
+id: "frontend-fetch-users-loading-next"
+title: "Fetching Data with useEffect & Handling Loading States"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useEffect"
+  - "fetch"
+  - "loading"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"loading-spinner\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"user-list\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"error-message\""
+  - contains:
+      file: "app/page.jsx"
+      text: "useEffect"
+  - contains:
+      file: "app/page.jsx"
+      text: "loading"
+  - contains:
+      file: "app/page.jsx"
+      text: "setTimeout"

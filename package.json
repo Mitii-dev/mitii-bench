@@ -15,10 +15,11 @@
     "cases": "pnpm --filter @mitii-bench/runner cases",
     "cases:open": "pnpm --filter @mitii-bench/runner cases:open",
     "bench": "pnpm --filter @mitii-bench/runner bench",
+    "preflight": "pnpm --filter @mitii-bench/runner preflight",
     "catalog": "pnpm --filter @mitii-bench/runner catalog",
     "import:solid": "pnpm --filter @mitii-bench/runner import:solid",
-    "test": "pnpm --filter @mitii-bench/runner test",
-    "fixtures:install": "node scripts/install-fixtures.mjs",
+    "test": "pnpm --filter @mitii-bench/checks test && pnpm --filter @mitii-bench/adapter-mitii test && pnpm --filter @mitii-bench/runner test",
+    "starters:install": "node scripts/install-starters.mjs",
     "generate:react-frontend": "node scripts/generate-react-frontend-cases.mjs",
     "generate:node-backend": "node scripts/generate-node-backend-cases.mjs",
     "postinstall": "pnpm catalog"

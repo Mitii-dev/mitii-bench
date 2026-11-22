@@ -1,9 +1,0 @@
-- contains:
-    file: src/models/User.js
-    text: "fullName"
-- contains:
-    file: src/models/User.js
-    text: "virtual"
-- contains:
-    file: src/models/User.js
-    text: "mongoose"

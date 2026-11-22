@@ -11,20 +11,32 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
+      yaml:
+        specifier: ^2.7.0
+        version: 2.9.1
 
   packages/adapters/mitii: {}
+
+  packages/checks:
+    dependencies:
+      better-sqlite3:
+        specifier: ^11.8.1
+        version: 11.10.0
+      yaml:
+        specifier: ^2.7.0
+        version: 2.9.1
 
   packages/runner:
     dependencies:
       '@mitii-bench/adapter-mitii':
         specifier: workspace:*
         version: link:../adapters/mitii
+      '@mitii-bench/checks':
+        specifier: workspace:*
+        version: link:../checks
       '@mitii-bench/schema':
         specifier: workspace:*
         version: link:../schema
-      better-sqlite3:
-        specifier: ^11.8.1
-        version: 11.10.0
       yaml:
         specifier: ^2.7.0
         version: 2.9.1

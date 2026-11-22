@@ -1,0 +1,41 @@
+id: "frontend-shopping-cart-next"
+title: "Shopping Cart with Quantity Modifiers & Total Summary"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "cart"
+  - "ecommerce"
+  - "quantity"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "cart-item-"
+  - contains:
+      file: "app/page.jsx"
+      text: "inc-"
+  - contains:
+      file: "app/page.jsx"
+      text: "dec-"
+  - contains:
+      file: "app/page.jsx"
+      text: "line-total-"
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"grand-total\""
+  - contains:
+      file: "app/page.jsx"
+      text: "grand-total"

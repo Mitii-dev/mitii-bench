@@ -1,0 +1,47 @@
+id: "backend-redis-pubsub-notifications"
+title: "Real-Time Distributed Notification System"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages:
+  - "ioredis"
+  - "socket.io"
+difficulty: "hard"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "ecosystem-lib"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - package_deps:
+      packages:
+        - "ioredis"
+        - "socket.io"
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "publish"
+  - contains:
+      file: "src/index.js"
+      text: "subscribe"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/notify"
+          json:
+            channel: "alerts"
+            message: "ping"
+          expect:
+            status: 200
+            jsonSubset:
+              published: true

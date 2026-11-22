@@ -1,9 +1,0 @@
-- contains:
-    file: app/page.jsx
-    text: "otp-input-"
-- contains:
-    file: app/page.jsx
-    text: "Backspace"
-- contains:
-    file: app/page.jsx
-    text: "focus"

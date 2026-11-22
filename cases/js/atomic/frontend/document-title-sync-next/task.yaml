@@ -1,0 +1,32 @@
+id: "frontend-document-title-sync-next"
+title: "useEffect & Side Effects (DOM Title Synchronization)"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useEffect"
+  - "side-effects"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"title-input\""
+  - contains:
+      file: "app/page.jsx"
+      text: "useEffect"
+  - contains:
+      file: "app/page.jsx"
+      text: "document.title"

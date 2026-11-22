@@ -1,0 +1,37 @@
+id: "frontend-error-boundary-react"
+title: "Error Boundaries"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "error-boundary"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"crash-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"error-fallback\""
+  - contains:
+      file: "src/App.jsx"
+      text: "componentDidCatch"
+  - contains:
+      file: "src/App.jsx"
+      text: "getDerivedStateFromError"
+  - contains:
+      file: "src/App.jsx"
+      text: "Something went wrong"

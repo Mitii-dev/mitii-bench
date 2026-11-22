@@ -12,6 +12,7 @@
     "case:dry-run": "node src/cli.js case:dry-run",
     "cases": "node src/cli.js cases",
     "cases:open": "node src/cli.js cases --open",
+    "preflight": "node src/cli.js preflight",
     "bench": "node src/cli.js bench",
     "catalog": "node src/cli.js catalog",
     "import:solid": "node src/cli.js import:solid",
@@ -19,8 +20,8 @@
   },
   "dependencies": {
     "@mitii-bench/adapter-mitii": "workspace:*",
+    "@mitii-bench/checks": "workspace:*",
     "@mitii-bench/schema": "workspace:*",
-    "better-sqlite3": "^11.8.1",
     "yaml": "^2.7.0"
   }
 }

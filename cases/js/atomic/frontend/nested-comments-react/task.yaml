@@ -1,0 +1,35 @@
+id: "frontend-nested-comments-react"
+title: "Nested Comments System (Tree Structure)"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "comments"
+  - "tree"
+  - "recursive"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "comment-"
+  - contains:
+      file: "src/App.jsx"
+      text: "reply-btn-"
+  - contains:
+      file: "src/App.jsx"
+      text: "replies"
+  - contains:
+      file: "src/App.jsx"
+      text: "paddingLeft"

@@ -3,9 +3,9 @@ import { discoverProjects, discoverTasks } from "./loader.js";
 import { buildCatalog } from "./catalog.js";
 import { caseNew } from "./case-new.js";
 import { generateCasesBrowser, openCasesBrowser } from "./cases-browser.js";
-// catalog + cases.html regenerated together on validate
 import { importSolidBenchmark } from "./import-solid.js";
 import { dryRunTask, runProject, runTask, validateAll } from "./runner.js";
+import { runPreflight } from "./preflight.js";
 import { repoRoot } from "./paths.js";
 
 const args = process.argv.slice(2);
@@ -13,6 +13,8 @@ const command = args[0];
 const flags = parseFlags(args.slice(1));
 
 async function main() {
+  if (flags.mitiiBin) process.env.MITII_BIN = String(flags.mitiiBin);
+
   switch (command) {
     case "case:validate":
     case "validate": {
@@ -24,15 +26,13 @@ async function main() {
         for (const e of result.errors) console.error(`  - ${e.path}: ${e.error}`);
         process.exit(1);
       }
-      console.log(
-        `OK — ${result.count} matrix instances validated; catalog + ${browserPath} written.`,
-      );
+      console.log(`OK — ${result.count} cases validated; catalog + ${browserPath} written.`);
       break;
     }
     case "catalog": {
       const catalog = buildCatalog();
       const browserPath = generateCasesBrowser();
-      console.log(`Wrote catalog with ${catalog.count} instances + ${browserPath}.`);
+      console.log(`Wrote catalog with ${catalog.count} cases + ${browserPath}.`);
       break;
     }
     case "cases": {
@@ -42,6 +42,7 @@ async function main() {
       } else if (
         flags.search ||
         flags.base ||
+        flags.starter ||
         flags.family ||
         flags.package ||
         flags.ecosystem ||
@@ -50,7 +51,8 @@ async function main() {
       ) {
         const tasks = discoverTasks(repoRoot(), {
           search: flags.search,
-          base: flags.base,
+          base: flags.base || flags.starter,
+          starter: flags.starter || flags.base,
           family: flags.family,
           package: flags.package,
           ecosystem: flags.ecosystem,
@@ -59,7 +61,7 @@ async function main() {
         });
         for (const t of tasks.filter((x) => !x.error)) {
           console.log(
-            `${t.runId}\t${t.ecosystem}\t${t.family}\t${t.base}\t${t.title}`,
+            `${t.runId}\t${t.ecosystem}\t${t.family}\t${t.starter}\t${t.title}`,
           );
         }
       } else {
@@ -75,8 +77,7 @@ async function main() {
         category: flags.category,
         family: flags.family,
         slug: flags.slug,
-        bases: flags.bases || flags.base,
-        fixture: flags.fixture,
+        starter: flags.starter || flags.base || flags.fixture,
         difficulty: flags.difficulty,
         title: flags.title,
         prompt: flags.prompt,
@@ -88,25 +89,10 @@ async function main() {
     case "case:dry-run": {
       const id = flags._[0] || flags.id;
       if (!id) {
-        console.error("Usage: case:dry-run <task-id|task-id@base> [--base=]");
+        console.error("Usage: case:dry-run <task-id>");
         process.exit(1);
       }
-      const ref = flags.base && !id.includes("@") ? `${id}@${flags.base}` : id;
-      // If bare id with multiple bases and no --base, dry-run all matrix rows
-      const matches = discoverTasks(repoRoot(), {
-        id: id.includes("@") ? id.split("@")[0] : id,
-        base: flags.base,
-      }).filter((t) => !t.error);
-      if (!id.includes("@") && !flags.base && matches.length > 1) {
-        let failed = 0;
-        for (const t of matches) {
-          const report = await dryRunTask(t.runId, { keep: flags.keep !== false });
-          printReport(report);
-          if (!report.passed) failed += 1;
-        }
-        process.exit(failed ? 1 : 0);
-      }
-      const report = await dryRunTask(ref, { keep: flags.keep !== false });
+      const report = await dryRunTask(id, { keep: flags.keep !== false });
       printReport(report);
       process.exit(report.passed ? 0 : 1);
       break;
@@ -129,7 +115,8 @@ async function main() {
         category: flags.category,
         tag: flags.tag,
         fixture: flags.fixture,
-        base: flags.base,
+        base: flags.base || flags.starter,
+        starter: flags.starter || flags.base,
         family: flags.family,
         package: flags.package,
         ecosystem: flags.ecosystem,
@@ -147,25 +134,9 @@ async function main() {
         }
         process.exit(failed ? 1 : 0);
       }
-      const ref = flags.base && !String(id).includes("@") ? `${id}@${flags.base}` : id;
-      const matches = discoverTasks(repoRoot(), {
-        ...filter,
-        id: String(id).includes("@") ? String(id).split("@")[0] : id,
-      }).filter((t) => !t.error);
-      if (!String(id).includes("@") && !flags.base && matches.length > 1) {
-        let failed = 0;
-        for (const t of matches) {
-          const report = flags.dryRun
-            ? await dryRunTask(t.runId)
-            : await runTask(t.runId, { skipAgent: Boolean(flags.skipAgent) });
-          printReport(report);
-          if (!report.passed) failed += 1;
-        }
-        process.exit(failed ? 1 : 0);
-      }
       const report = flags.dryRun
-        ? await dryRunTask(ref)
-        : await runTask(ref, { skipAgent: Boolean(flags.skipAgent) });
+        ? await dryRunTask(id)
+        : await runTask(id, { skipAgent: Boolean(flags.skipAgent) });
       printReport(report);
       process.exit(report.passed ? 0 : 1);
       break;
@@ -194,6 +165,29 @@ async function main() {
       if (result.imported.length > 20) console.log(`  … +${result.imported.length - 20} more`);
       break;
     }
+    case "preflight":
+    case "bench:preflight": {
+      const result = await runPreflight({
+        mitiiBin: flags.mitiiBin || undefined,
+        strict: Boolean(flags.strict),
+      });
+      console.log(`Mitii bin: ${result.bin ?? "(not found)"}`);
+      for (const step of result.steps) {
+        const mark = step.ok ? "✓" : step.soft ? "!" : "✗";
+        const label = step.ok ? step.name : step.soft ? `${step.name} (advisory)` : step.name;
+        console.log(
+          `  ${mark} ${label}${step.details ? `\n    ${String(step.details).split("\n").join("\n    ")}` : ""}`,
+        );
+      }
+      if (!result.ok) {
+        console.error(
+          "\nPreflight failed. Set MITII_BIN, run `mitii setup --provider <id> --yes --global`, then retry.",
+        );
+        process.exit(1);
+      }
+      console.log("\nPreflight OK — safe to run `pnpm bench …` (agent).");
+      break;
+    }
     case "help":
     case undefined:
       printHelp();
@@ -207,7 +201,7 @@ async function main() {
 
 function printReport(report) {
   console.log(
-    `${report.passed ? "PASS" : "FAIL"} ${report.id}${report.base ? ` [${report.base}]` : ""} (${report.mode})`,
+    `${report.passed ? "PASS" : "FAIL"} ${report.id}${report.starter ? ` [${report.starter}]` : ""} (${report.mode})`,
   );
   for (const c of report.checks ?? []) {
     console.log(
@@ -223,8 +217,9 @@ function printHelp() {
 Commands:
   case:validate              Validate all task.yaml + write catalog
   case:new                   Interactive wizard (or flags)
-  case:dry-run <id|id@base>  Apply solution + grade (no LLM); all bases if bare id
+  case:dry-run <id>          Apply solution + checks (no LLM)
   cases [--open] [--search=] Browse / search cases
+  preflight                  Check Mitii bin + setup + doctor (no LLM)
   bench [--dry-run] [id]     Run agent or dry-run filters
   bench --project=<id>       Cumulative project run
   projects                   List project suites
@@ -233,13 +228,13 @@ Commands:
 
 Filters:
   --ecosystem=js             Language folder: js|python|…
-  --base=base-react-js       Only this base fixture
+  --starter=react-js         Only this starter
   --family=frontend          frontend|api|fullstack|repair|migration|project
   --package=mui              Cases declaring packages: [mui]
   --category= --tag= --difficulty=
 
 Flags:
-  --bases=base-react-js,base-next-js
+  --mitii-bin=<path>         Override Mitii CLI (else MITII_BIN / PATH / config)
   --slug= --prompt= --title= --id= --yes
   --from= --suite= --limit= --dry-run --keep
   --stepFrom= --stepTo= --allow-solution-fallback

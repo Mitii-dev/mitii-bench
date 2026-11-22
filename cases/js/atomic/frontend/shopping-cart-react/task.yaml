@@ -1,0 +1,41 @@
+id: "frontend-shopping-cart-react"
+title: "Shopping Cart with Quantity Modifiers & Total Summary"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "cart"
+  - "ecommerce"
+  - "quantity"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "cart-item-"
+  - contains:
+      file: "src/App.jsx"
+      text: "inc-"
+  - contains:
+      file: "src/App.jsx"
+      text: "dec-"
+  - contains:
+      file: "src/App.jsx"
+      text: "line-total-"
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"grand-total\""
+  - contains:
+      file: "src/App.jsx"
+      text: "grand-total"

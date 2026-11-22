@@ -1,0 +1,41 @@
+id: "frontend-date-range-picker-react"
+title: "Date Picker & Range Selector"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "date"
+  - "validation"
+  - "range"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"start-date\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"end-date\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"date-error\""
+  - contains:
+      file: "src/App.jsx"
+      text: "date-error"
+  - contains:
+      file: "src/App.jsx"
+      text: "prior"
+  - contains:
+      file: "src/App.jsx"
+      text: "End Date"

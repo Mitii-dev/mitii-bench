@@ -1,0 +1,83 @@
+# Example: nightly agent eval (costs tokens).
+# Copy into your Mitii or monorepo workflows and set secrets + MITII_BIN.
+#
+# Required secrets (pick what your provider needs):
+#   ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY / MITII_API_KEY
+name: mitii-bench-agent-nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  agent-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      # Adjust after checkout layout
+      MITII_BIN: ${{ github.workspace }}/Mitii/apps/cli/bin/mitii.js
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      MITII_PROVIDER: anthropic
+      # MITII_MODEL: claude-sonnet-4-5
+    steps:
+      - name: Checkout Mitii
+        uses: actions/checkout@v4
+        with:
+          path: Mitii
+
+      - name: Checkout mitii-bench
+        uses: actions/checkout@v4
+        with:
+          repository: YOUR_ORG/mitii-bench
+          ref: main
+          path: mitii-bench
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: |
+            Mitii/pnpm-lock.yaml
+            mitii-bench/pnpm-lock.yaml
+
+      - name: Build Mitii CLI
+        working-directory: Mitii
+        run: |
+          pnpm install --filter @mitii/cli...
+          pnpm --filter @mitii/cli build
+          test -f apps/cli/bin/mitii.js
+          node apps/cli/bin/mitii.js --version
+
+      - name: Setup Mitii (non-interactive)
+        run: |
+          "$MITII_BIN" setup --provider "${MITII_PROVIDER}" --yes --global
+          "$MITII_BIN" setup --show
+          "$MITII_BIN" doctor
+
+      - name: Install bench + starters
+        working-directory: mitii-bench
+        run: |
+          pnpm install
+          pnpm starters:install
+          pnpm case:validate
+
+      - name: Preflight
+        working-directory: mitii-bench
+        run: pnpm preflight
+
+      - name: Agent smoke (tag=smoke)
+        working-directory: mitii-bench
+        run: pnpm --filter @mitii-bench/runner bench --tag=smoke
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mitii-bench-reports
+          path: mitii-bench/reports/
+          if-no-files-found: ignore

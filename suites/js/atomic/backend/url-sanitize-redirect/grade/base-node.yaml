@@ -1,9 +1,0 @@
-- contains:
-    file: src/sanitizeRedirectUrl.js
-    text: "sanitizeRedirectUrl"
-- contains:
-    file: src/sanitizeRedirectUrl.js
-    text: "utm_source"
-- contains:
-    file: src/sanitizeRedirectUrl.js
-    text: "URL"

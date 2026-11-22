@@ -1,0 +1,38 @@
+id: "frontend-jotai-shared-atom"
+title: "Jotai: Atomic State"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "jotai"
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "jotai"
+  - "state"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"atom-inc-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"atom-value-display\""
+  - contains:
+      file: "src/App.jsx"
+      text: "jotai"
+  - contains:
+      file: "src/App.jsx"
+      text: "atom"
+  - contains:
+      file: "src/App.jsx"
+      text: "useAtom"
+  - contains:
+      file: "src/App.jsx"
+      text: "countAtom"

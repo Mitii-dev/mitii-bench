@@ -1,0 +1,33 @@
+id: "frontend-redux-async-thunk"
+title: "Redux Toolkit: Async Thunk Data Fetching"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "redux"
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "redux"
+  - "async"
+  - "state"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"thunk-status\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"thunk-data-list\""
+  - contains:
+      file: "src/App.jsx"
+      text: "@reduxjs/toolkit"
+  - contains:
+      file: "src/App.jsx"
+      text: "createAsyncThunk"

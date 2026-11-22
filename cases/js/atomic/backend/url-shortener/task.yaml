@@ -1,0 +1,40 @@
+id: "backend-url-shortener"
+title: "URL Shortener Service with Analytics"
+ecosystem: "js"
+starter: "node"
+family: "api"
+packages: []
+difficulty: "medium"
+category: "backend"
+language: "javascript"
+tags:
+  - "node-tasks"
+  - "realworld"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      timeoutMs: 120000
+  - contains:
+      file: "src/index.js"
+      text: "/shorten"
+  - contains:
+      file: "src/index.js"
+      text: "redirect"
+  - http:
+      start:
+        command: "node src/index.js"
+      timeoutMs: 20000
+      requests:
+        - method: "POST"
+          path: "/shorten"
+          json:
+            url: "https://example.com"
+          expect:
+            status: 201
+            jsonPaths:
+              - "code"

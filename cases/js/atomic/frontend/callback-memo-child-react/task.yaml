@@ -1,0 +1,38 @@
+id: "frontend-callback-memo-child-react"
+title: "useCallback for Performance Optimization"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "useCallback"
+  - "memo"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"parent-count\""
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid=\"child-action-btn\""
+  - contains:
+      file: "src/App.jsx"
+      text: "useCallback"
+  - contains:
+      file: "src/App.jsx"
+      text: "memo("
+  - contains:
+      file: "src/App.jsx"
+      text: "ChildButton"

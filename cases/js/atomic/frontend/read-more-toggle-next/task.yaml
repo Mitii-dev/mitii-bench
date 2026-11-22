@@ -1,0 +1,38 @@
+id: "frontend-read-more-toggle-next"
+title: "Read More / Read Less Text Truncator"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "easy"
+category: "frontend"
+language: "javascript"
+tags:
+  - "truncate"
+  - "read-more"
+  - "text"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"text-block\""
+  - contains:
+      file: "app/page.jsx"
+      text: "data-testid=\"toggle-read-more\""
+  - contains:
+      file: "app/page.jsx"
+      text: "Read More"
+  - contains:
+      file: "app/page.jsx"
+      text: "Read Less"
+  - contains:
+      file: "app/page.jsx"
+      text: "100"
