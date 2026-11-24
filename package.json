@@ -6,7 +6,7 @@
   "description": "Open-source Mitii coding-agent evaluation benchmark: folder-per-case tasks, YAML contribution UX, behavior-based grading.",
   "packageManager": "pnpm@9.15.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "scripts": {
     "case:new": "pnpm --filter @mitii-bench/runner case:new",

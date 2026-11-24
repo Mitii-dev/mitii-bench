@@ -4,28 +4,20 @@
 
 Build a NestJS response interceptor implementing `NestInterceptor`.
 
-## Ecosystem
+## Starter
 
-`js` — frameworks & ecosystem (prompt #47 from `references/node-tasks.md`).
-
-## Bases
-
-- `base-nest-js`
+`nest-js` — NestJS starter — implement under `src/`.
 
 ## Packages
 
-_None beyond the base fixture._
+_None beyond the starter._
 
 ```bash
 pnpm case:dry-run backend-nest-transform-interceptor
-pnpm case:dry-run backend-nest-transform-interceptor@base-nest-js
 ```
 
-## How we grade
+## How we check
 
-- Shared: `npm run build`
-- Shared: `test:` — agent-hidden `node:test` behavioral suite
-- Per-base: structural `contains` markers
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
 - `solution/` is dry-run only (never shown to the agent)
-
-Source: `references/node-tasks.md`.

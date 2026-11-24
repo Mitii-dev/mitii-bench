@@ -4,28 +4,20 @@
 
 Build a lightweight full-text search indexer in pure JavaScript for a list of document objects supporting term frequency-inverse document frequency (TF-IDF) scoring.
 
-## Ecosystem
+## Starter
 
-`js` — real-world backend (prompt #90 from `references/node-tasks.md`).
-
-## Bases
-
-- `base-node`
+`node` — Node.js starter — implement under `src/`.
 
 ## Packages
 
-_None beyond the base fixture._
+_None beyond the starter._
 
 ```bash
 pnpm case:dry-run backend-inverted-index-search
-pnpm case:dry-run backend-inverted-index-search@base-node
 ```
 
-## How we grade
+## How we check
 
-- Shared: `npm run build`
-- Shared: `test:` — agent-hidden `node:test` behavioral suite
-- Per-base: structural `contains` markers
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
 - `solution/` is dry-run only (never shown to the agent)
-
-Source: `references/node-tasks.md`.

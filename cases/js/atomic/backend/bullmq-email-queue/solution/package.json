@@ -9,7 +9,7 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "better-sqlite3": "^11.8.1",
+    "better-sqlite3": "^12.10.0",
     "express": "^4.21.2",
     "bullmq": "^5.34.5",
     "ioredis": "^5.4.2"

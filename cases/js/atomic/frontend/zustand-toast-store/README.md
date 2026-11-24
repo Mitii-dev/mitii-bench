@@ -4,24 +4,19 @@
 
 Build a simple global notification store using Zustand.
 
-## Ecosystem
+## Starter
 
-`js`
-
-## Bases
-
-- `base-react-js`
+`react-js` — Vite + React — implement in `src/App.jsx`.
 
 ## Packages
 
 - `zustand`
 
-Install required libraries in the workspace before the app builds. Dry-run solutions are not shipped yet for ecosystem-lib cases — use agent evals.
-
 ```bash
-pnpm case:validate
-# dry-run once solution/base-react-js/ exists:
-# pnpm case:dry-run frontend-zustand-toast-store
+pnpm case:dry-run frontend-zustand-toast-store
 ```
 
-Source: `references/react-tasks.md`.
+## How we check
+
+- Recipes in `task.yaml` under `checks:`
+- No dry-run `solution/` yet — use agent evals or add one

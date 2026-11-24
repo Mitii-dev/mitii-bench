@@ -4,24 +4,19 @@
 
 Build a search result page using Next.js App Router `useSearchParams`.
 
-## Ecosystem
+## Starter
 
-`js`
-
-## Bases
-
-- `base-next-js`
+`next-js` — Next.js App Router — implement in `app/page.jsx` as a client component (`"use client"`).
 
 ## Packages
 
-_None (framework built-ins)._
-
-Vanilla Next.js App Router APIs (no extra packages).
+_None beyond the starter._
 
 ```bash
-pnpm case:validate
-# dry-run once solution/base-next-js/ exists:
-# pnpm case:dry-run frontend-next-search-params
+pnpm case:dry-run frontend-next-search-params
 ```
 
-Source: `references/react-tasks.md`.
+## How we check
+
+- Recipes in `task.yaml` under `checks:`
+- `solution/` is dry-run only (never shown to the agent)

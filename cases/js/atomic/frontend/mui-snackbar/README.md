@@ -4,24 +4,19 @@
 
 Build a feedback notification trigger using MUI Snackbar and Alert.
 
-## Ecosystem
+## Starter
 
-`js`
-
-## Bases
-
-- `base-react-js`
+`react-js` — Vite + React — implement in `src/App.jsx`.
 
 ## Packages
 
 - `mui`
 
-Install required libraries in the workspace before the app builds. Dry-run solutions are not shipped yet for ecosystem-lib cases — use agent evals.
-
 ```bash
-pnpm case:validate
-# dry-run once solution/base-react-js/ exists:
-# pnpm case:dry-run frontend-mui-snackbar
+pnpm case:dry-run frontend-mui-snackbar
 ```
 
-Source: `references/react-tasks.md`.
+## How we check
+
+- Recipes in `task.yaml` under `checks:`
+- No dry-run `solution/` yet — use agent evals or add one

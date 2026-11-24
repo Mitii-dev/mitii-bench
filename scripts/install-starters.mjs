@@ -36,13 +36,15 @@ for (const { name, dir } of starterDirs()) {
     ["install", ...(needsNative ? [] : ["--ignore-scripts"]), "--no-audit", "--no-fund"],
     { cwd: dir, stdio: "inherit", shell: process.platform === "win32" },
   );
-  if (r.status !== 0) process.exit(r.status ?? 1);
-  if (needsNative) {
-    spawnSync("npm", ["rebuild", "better-sqlite3", "--no-audit", "--no-fund"], {
-      cwd: dir,
-      stdio: "inherit",
-      shell: process.platform === "win32",
-    });
+  if (r.status !== 0) {
+    if (needsNative) {
+      console.error(
+        `\n[${name}] native install failed (better-sqlite3).\n` +
+          `Use Node.js 22 LTS or 24 with better-sqlite3 >=12.10 (prebuilds), ` +
+          `or install Visual Studio Build Tools (MSVC, not ClangCL-only).\n`,
+      );
+    }
+    process.exit(r.status ?? 1);
   }
 }
 console.log("Starters ready.");

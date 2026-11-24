@@ -4,28 +4,20 @@
 
 Build a order processing pipeline using `events.EventEmitter`.
 
-## Ecosystem
+## Starter
 
-`js` — Node.js core / async (prompt #4 from `references/node-tasks.md`).
-
-## Bases
-
-- `base-node`
+`node` — Node.js starter — implement under `src/`.
 
 ## Packages
 
-_None beyond the base fixture._
+_None beyond the starter._
 
 ```bash
 pnpm case:dry-run backend-eventemitter-order-pipeline
-pnpm case:dry-run backend-eventemitter-order-pipeline@base-node
 ```
 
-## How we grade
+## How we check
 
-- Shared: `npm run build`
-- Shared: `test:` — agent-hidden `node:test` behavioral suite
-- Per-base: structural `contains` markers
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
 - `solution/` is dry-run only (never shown to the agent)
-
-Source: `references/node-tasks.md`.

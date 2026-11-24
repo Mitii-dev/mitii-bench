@@ -13,6 +13,13 @@ packages/
 
 **One case folder = one starter.** React and Next are separate cases.
 
+## Requirements
+
+- Node.js **>=22.13** (uses built-in `node:sqlite` for grading; no native SQLite addon in the bench packages)
+- pnpm 9
+
+Backend `node` starter / case solutions still use `better-sqlite3` **^12.10** (ships Windows/macOS/Linux prebuilds for Node 22/24). Prefer Node 22 LTS or 24 — avoid compiling from source.
+
 ## Quick start (no LLM)
 
 ```bash

@@ -14,7 +14,7 @@ Checks are pluggable validators. Authors declare them under `checks:` in `task.y
 | `exists: { file }` | File must exist |
 | `command: { run }` | Arbitrary shell command |
 | `http: { start, requests }` | Start server + assert HTTP |
-| `sqlite_query: { … }` | Query SQLite |
+| `sqlite_query: { … }` | Query SQLite via built-in `node:sqlite` (Node >=22.13) |
 | `package_deps: […]` | Required packages in package.json |
 | `workspace_changed` | Workspace must differ from starter |
 

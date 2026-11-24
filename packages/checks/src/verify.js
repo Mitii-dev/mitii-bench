@@ -1,11 +1,11 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import Database from "better-sqlite3";
 import { parse as parseYaml } from "yaml";
 import { runHttpCheck } from "./http.js";
 import { runProcess } from "./process.js";
 import { diffSnapshots } from "./snapshot.js";
 import { formatCommandCheckDetails, result } from "./result.js";
+import { openReadonlyDatabase } from "./sqlite.js";
 
 const registry = new Map();
 
@@ -131,7 +131,7 @@ function runPackageDepsCheck(check, workspace) {
 function runSqliteQueryCheck(check, workspace) {
   const dbPath = join(workspace, check.dbPath);
   if (!existsSync(dbPath)) return result(false, `sqlite db not found: ${check.dbPath}`);
-  const db = new Database(dbPath, { readonly: true });
+  const db = openReadonlyDatabase(dbPath);
   try {
     const rows = db.prepare(check.sql).all();
     const row = rows[check.row ?? 0];

@@ -4,27 +4,20 @@
 
 Build a file upload form using uncontrolled inputs.
 
-## Ecosystem
+## Starter
 
-`js` — matrix on React (Vite) and Next.js App Router.
+`react-js` — Vite + React — implement in `src/App.jsx`.
 
-## Bases
+## Packages
 
-| Base | Approach |
-|---|---|
-| `base-react-js` | Client UI in `src/App.jsx` |
-| `base-next-js` | Client page in `app/page.jsx` (`"use client"`) |
+_None beyond the starter._
 
 ```bash
 pnpm case:dry-run frontend-uncontrolled-file-upload-react
-pnpm case:dry-run frontend-uncontrolled-file-upload-react@base-react-js
 ```
 
-## How we grade
+## How we check
 
-- Shared: `npm run build`
-- Shared: Vitest + Testing Library `test:` (behavioral; agent-hidden under `tests/`)
-- Per-base: `data-testid` / marker asserts in source
-- `solution/` is dry-run only
-
-Source: `references/react-tasks.md` (vanilla React — no extra packages).
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
+- `solution/` is dry-run only (never shown to the agent)

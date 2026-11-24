@@ -4,13 +4,9 @@
 
 Build a product search service with Prisma.
 
-## Ecosystem
+## Starter
 
-`js` — frameworks & ecosystem (prompt #34 from `references/node-tasks.md`).
-
-## Bases
-
-- `base-node`
+`node` — Node.js starter — implement under `src/`.
 
 ## Packages
 
@@ -19,15 +15,10 @@ Build a product search service with Prisma.
 
 ```bash
 pnpm case:dry-run backend-prisma-product-search
-pnpm case:dry-run backend-prisma-product-search@base-node
 ```
 
-## How we grade
+## How we check
 
-- Shared: `npm run build`
-- Shared: `package_deps` — required packages listed in `package.json`
-- Shared: `test:` — agent-hidden `node:test` behavioral suite
-- Per-base: structural `contains` markers
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
 - `solution/` is dry-run only (never shown to the agent)
-
-Source: `references/node-tasks.md`.

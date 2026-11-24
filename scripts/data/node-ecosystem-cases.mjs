@@ -36,7 +36,7 @@ function nodePkg(extra = {}) {
         test: "node --test test/*.test.js",
       },
       dependencies: {
-        "better-sqlite3": "^11.8.1",
+        "better-sqlite3": "^12.10.0",
         express: "^4.21.2",
         ...extra,
       },

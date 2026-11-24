@@ -4,13 +4,9 @@
 
 Build a PDF generation endpoint rendering HTML templates to PDF buffers using `puppeteer` or `pdfkit`.
 
-## Ecosystem
+## Starter
 
-`js` — real-world backend (prompt #83 from `references/node-tasks.md`).
-
-## Bases
-
-- `base-node`
+`node` — Node.js starter — implement under `src/`.
 
 ## Packages
 
@@ -18,16 +14,10 @@ Build a PDF generation endpoint rendering HTML templates to PDF buffers using `p
 
 ```bash
 pnpm case:dry-run backend-pdf-invoice-report
-pnpm case:dry-run backend-pdf-invoice-report@base-node
 ```
 
-## How we grade
+## How we check
 
-- Shared: `npm run build`
-- Shared: `package_deps` — required packages listed in `package.json`
-- Shared: `test:` — agent-hidden `node:test` behavioral suite
-- Per-base: HTTP multi-step status / payload / header checks
-- Per-base: structural `contains` markers
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
 - `solution/` is dry-run only (never shown to the agent)
-
-Source: `references/node-tasks.md`.

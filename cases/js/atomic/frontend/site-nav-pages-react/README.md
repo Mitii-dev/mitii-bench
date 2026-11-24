@@ -1,30 +1,23 @@
-# Site nav + footer pages
+# Site nav + footer pages with dummy content
 
 ## Goal
 
-Top nav: **Home**, **About**, **Careers**.  
-Footer: **Terms and Conditions**, **Privacy Policy**.  
-Each destination shows dummy content when opened.
+Build a small marketing site shell:
 
-## Ecosystem
+## Starter
 
-`js` — bases under `fixtures/js/`.
+`react-js` — Vite + React — implement in `src/App.jsx`.
 
-## Bases (matrix)
+## Packages
 
-| Base | Approach |
-|---|---|
-| `base-react-js` | Client-side views in `src/App.jsx` |
-| `base-next-js` | App Router pages under `app/` |
+_None beyond the starter._
 
 ```bash
 pnpm case:dry-run frontend-site-nav-pages-react
-pnpm case:dry-run frontend-site-nav-pages-react@base-react-js
 ```
 
-## How we grade
+## How we check
 
-- Per-base source asserts for nav/footer labels + page content markers
-- `npm run build`
-
-`solution/` is only for dry-run (apply known-good files → run grades). Agent evals never compare to it. See [docs/AUTHORING.md](../../../../../docs/AUTHORING.md).
+- Recipes in `task.yaml` under `checks:`
+- Hidden automated tests in `tests/` (injected only at check time)
+- `solution/` is dry-run only (never shown to the agent)
