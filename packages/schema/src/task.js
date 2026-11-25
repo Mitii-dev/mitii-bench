@@ -20,10 +20,139 @@ const existsGrade = z.object({
   }),
 });
 
+const notExistsGrade = z.object({
+  notExists: z.object({
+    file: z.string().min(1),
+  }),
+});
+
+const containsAnyGrade = z.object({
+  containsAny: z
+    .object({
+      files: z.array(z.string().min(1)).min(1).optional(),
+      file: z.string().min(1).optional(),
+      text: z.string().min(1),
+    })
+    .refine((c) => Boolean(c.file || c.files?.length), {
+      message: "containsAny requires file or files",
+    }),
+});
+
+const dirHasFilesGrade = z.object({
+  dirHasFiles: z.object({
+    path: z.string().min(1),
+    minimum: z.number().int().positive().optional(),
+  }),
+});
+
+const fileMatchGrade = z.object({
+  fileMatch: z
+    .object({
+      file: z.string().min(1).optional(),
+      files: z.array(z.string().min(1)).min(1).optional(),
+      patterns: z.array(z.string().min(1)).min(1),
+      mode: z.enum(["all", "any"]).optional(),
+    })
+    .refine((c) => Boolean(c.file || c.files?.length), {
+      message: "fileMatch requires file or files",
+    }),
+});
+
+const workflowGrade = z.object({
+  workflow: z.object({
+    path: z.string().min(1),
+    requireJobs: z.array(z.string().min(1)).optional(),
+    requireTriggers: z.array(z.string().min(1)).optional(),
+  }),
+});
+
+const uiTargetShape = {
+  testId: z.string().min(1).optional(),
+  role: z.string().min(1).optional(),
+  name: z.string().min(1).optional(),
+  text: z.string().min(1).optional(),
+  label: z.string().min(1).optional(),
+  focused: z.boolean().optional(),
+};
+
+const uiTarget = z.object(uiTargetShape).refine(
+  (t) => Boolean(t.testId || t.role || t.text || t.label),
+  { message: "ui target needs testId, role, text, or label" },
+);
+
+const uiTypeTarget = z
+  .object({
+    ...uiTargetShape,
+    value: z.string(),
+  })
+  .refine((t) => Boolean(t.testId || t.role || t.text || t.label), {
+    message: "ui type target needs testId, role, text, or label",
+  });
+
+const uiStep = z
+  .object({
+    click: uiTarget.optional(),
+    type: uiTypeTarget.optional(),
+    press: z.union([z.string().min(1), z.object({ key: z.string().min(1) })]).optional(),
+    tab: z.union([z.literal(true), z.object({ shift: z.boolean().optional() })]).optional(),
+    expect: uiTarget.optional(),
+    expectNot: uiTarget.optional(),
+  })
+  .refine(
+    (s) =>
+      [s.click, s.type, s.press, s.tab, s.expect, s.expectNot].filter((v) => v !== undefined)
+        .length === 1,
+    { message: "each ui step needs exactly one action" },
+  );
+
+const uiGrade = z.object({
+  ui: z
+    .object({
+      entry: z.string().min(1),
+      steps: z.array(uiStep).min(1).optional(),
+      testIds: z.array(z.string().min(1)).min(1).optional(),
+      timeoutMs: z.number().optional(),
+    })
+    .refine((u) => Boolean(u.steps?.length || u.testIds?.length), {
+      message: "ui check requires steps or testIds",
+    }),
+});
+
+const testidGrade = z.object({
+  testid: z.object({
+    entry: z.string().min(1),
+    ids: z.array(z.string().min(1)).min(1),
+    timeoutMs: z.number().optional(),
+  }),
+});
+
 const buildGrade = z.object({
   build: z.union([
     z.literal(true),
     z.object({ command: z.string().optional(), timeoutMs: z.number().optional() }),
+  ]),
+});
+
+const typecheckGrade = z.object({
+  typecheck: z.union([
+    z.literal(true),
+    z.object({ command: z.string().optional(), timeoutMs: z.number().optional() }),
+  ]),
+});
+
+const compileGrade = z.object({
+  compile: z.union([
+    z.literal(true),
+    z.object({
+      build: z.boolean().optional(),
+      typecheck: z.boolean().optional(),
+      buildCommand: z.string().optional(),
+      typecheckCommand: z.string().optional(),
+      command: z.string().optional(),
+      timeoutMs: z.number().optional(),
+      buildTimeoutMs: z.number().optional(),
+      typecheckTimeoutMs: z.number().optional(),
+    }),
   ]),
 });
 
@@ -124,7 +253,16 @@ export const CheckItemSchema = z.union([
   containsGrade,
   notContainsGrade,
   existsGrade,
+  notExistsGrade,
+  containsAnyGrade,
+  dirHasFilesGrade,
+  fileMatchGrade,
+  workflowGrade,
+  uiGrade,
+  testidGrade,
   buildGrade,
+  typecheckGrade,
+  compileGrade,
   testGrade,
   browserGrade,
   commandGrade,

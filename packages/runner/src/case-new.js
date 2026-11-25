@@ -79,8 +79,19 @@ tags: [${category}]
 timeoutSec: 300
 promptFile: prompt.md
 readmeFile: README.md
+agent:
+  mode: agent
+  # mode: ask | plan  → no auto workspace_changed (see docs/CHECKS.md)
 checks:
   - build: true
+  # - typecheck: true
+  # - compile: true          # expands to labeled build + typecheck
+  # Easy frontend: ui / testid / fileMatch (docs/CHECKS.md)
+  # - ui:
+  #     entry: "src/App.jsx"
+  #     steps:
+  #       - click: { role: button, name: "/open/i" }
+  #       - expect: { testId: widget }
 `;
 
   writeFileSync(join(caseDir, "task.yaml"), yaml);
@@ -103,7 +114,7 @@ ${prompt}
 
 ## How we check
 
-Recipes in \`task.yaml\` under \`checks:\`. Hidden tests live in \`tests/\` (injected only at check time).
+Recipes in \`task.yaml\` under \`checks:\` (see \`docs/CHECKS.md\`). Prefer declarative \`ui:\` / \`testid:\` / \`fileMatch:\` for easy frontend cases; optional hidden \`tests/\` is injected only at check time.
 
 ## Local verify
 

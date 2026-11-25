@@ -85,7 +85,9 @@ export function loadTaskDir(caseDir, root) {
   if (checkItems.length === 0) {
     throw new Error(`No checks for ${task.id} — add checks: in task.yaml`);
   }
-  const checks = compileChecks(checkItems);
+  const checks = compileChecks(checkItems, {
+    agentMode: task.agent?.mode ?? "agent",
+  });
 
   const solutionDir = resolveSolutionDir(caseDir);
   const testsDir = resolveTestsDir(caseDir);
