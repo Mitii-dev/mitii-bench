@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { readMitiiSessionMetrics, runMitiiAgent } from "@mitii-bench/adapter-mitii";
-import { verifyCheck } from "@mitii-bench/checks";
+import { runCheckSuite } from "@mitii-bench/checks";
 import { loadConfig } from "./config.js";
 import {
   discoverProjects,
@@ -45,42 +45,43 @@ export async function dryRunTask(taskIdOrPath, options = {}) {
     const before = snapshotTree(ws.path);
     const after = snapshotTree(ws.path);
     applyTests(ws.path, task);
-    const results = [];
-    for (const check of task.checks) {
-      if (check.type === "agent_exit") {
-        results.push({ type: "agent_exit", passed: true, details: "dry-run" });
-        continue;
-      }
-      if (check.type === "workspace_changed") {
-        const fixtureSnap = snapshotTree(starterPath);
-        const solvedSnap = snapshotTree(ws.path);
-        const changed = diffSnapshots(fixtureSnap, solvedSnap).filter(
-          (p) =>
-            !p.startsWith("node_modules") &&
-            !p.startsWith("__bench__") &&
-            !p.startsWith("tests/") &&
-            !p.includes("/__bench__/") &&
-            !p.includes("oracle.test.js") &&
-            !p.includes(".test.") &&
-            !p.startsWith("package-lock.json"),
-        );
-        results.push({
-          type: "workspace_changed",
-          passed: changed.length > 0,
-          details: changed.join(", "),
-        });
-        continue;
-      }
-      results.push(
-        await verifyCheck(check, {
-          output: "dry-run",
-          agentExitCode: 0,
-          workspace: ws.path,
-          before,
-          after,
-        }),
-      );
-    }
+    const results = await runCheckSuite(
+      task.checks,
+      {
+        output: "dry-run",
+        agentExitCode: 0,
+        workspace: ws.path,
+        before,
+        after,
+      },
+      {
+        beforeCheck: async (check) => {
+          if (check.type === "agent_exit") {
+            return { type: "agent_exit", passed: true, details: "dry-run" };
+          }
+          if (check.type === "workspace_changed") {
+            const fixtureSnap = snapshotTree(starterPath);
+            const solvedSnap = snapshotTree(ws.path);
+            const changed = diffSnapshots(fixtureSnap, solvedSnap).filter(
+              (p) =>
+                !p.startsWith("node_modules") &&
+                !p.startsWith("__bench__") &&
+                !p.startsWith("tests/") &&
+                !p.includes("/__bench__/") &&
+                !p.includes("oracle.test.js") &&
+                !p.includes(".test.") &&
+                !p.startsWith("package-lock.json"),
+            );
+            return {
+              type: "workspace_changed",
+              passed: changed.length > 0,
+              details: changed.join(", "),
+            };
+          }
+          return null;
+        },
+      },
+    );
     const passed = results.every((r) => r.passed);
     const report = {
       id: task.runId ?? task.id,
@@ -130,18 +131,13 @@ export async function runTask(taskIdOrPath, options = {}) {
   const after = snapshotTree(ws.path);
   await ensureWorkspacePackages(ws.path, task, starterPath);
   applyTests(ws.path, task);
-  const results = [];
-  for (const check of task.checks) {
-    results.push(
-      await verifyCheck(check, {
-        output: `${agentResult.stdout}\n${agentResult.stderr}`,
-        agentExitCode: agentResult.exitCode,
-        workspace: ws.path,
-        before,
-        after,
-      }),
-    );
-  }
+  const results = await runCheckSuite(task.checks, {
+    output: `${agentResult.stdout}\n${agentResult.stderr}`,
+    agentExitCode: agentResult.exitCode,
+    workspace: ws.path,
+    before,
+    after,
+  });
 
   const session = options.skipAgent ? null : readMitiiSessionMetrics(ws.path);
   const report = {
@@ -215,44 +211,46 @@ export async function runProject(projectId, options = {}) {
     applyTests(ws.path, step.task);
     const before = snapshotTree(ws.path);
     const after = before;
-    const results = [];
-    for (const check of step.task.checks) {
-      if (check.type === "agent_exit") {
-        results.push({ type: "agent_exit", passed: true, details: "project-step" });
-        continue;
-      }
-      if (check.type === "workspace_changed") {
-        results.push({ type: "workspace_changed", passed: true, details: "cumulative" });
-        continue;
-      }
-      results.push(
-        await verifyCheck(check, {
+    const results = await runCheckSuite(
+      step.task.checks,
+      {
+        output: "",
+        agentExitCode: 0,
+        workspace: ws.path,
+        before,
+        after,
+      },
+      {
+        beforeCheck: async (check) => {
+          if (check.type === "agent_exit") {
+            return { type: "agent_exit", passed: true, details: "project-step" };
+          }
+          if (check.type === "workspace_changed") {
+            return { type: "workspace_changed", passed: true, details: "cumulative" };
+          }
+          return null;
+        },
+      },
+    );
+
+    if (project.cumulative && step.regression !== false) {
+      for (const prev of project.steps) {
+        if (prev.step >= step.step) break;
+        const regressionChecks = prev.task.checks.filter(
+          (check) =>
+            !["agent_exit", "workspace_changed", "workspace_unchanged", "start", "stop", "pretest", "posttest"].includes(
+              check.type,
+            ),
+        );
+        const regResults = await runCheckSuite(regressionChecks, {
           output: "",
           agentExitCode: 0,
           workspace: ws.path,
           before,
           after,
-        }),
-      );
-    }
-
-    if (project.cumulative && step.regression !== false) {
-      for (const prev of project.steps) {
-        if (prev.step >= step.step) break;
-        for (const check of prev.task.checks) {
-          if (["agent_exit", "workspace_changed", "workspace_unchanged"].includes(check.type)) {
-            continue;
-          }
-          results.push({
-            ...(await verifyCheck(check, {
-              output: "",
-              agentExitCode: 0,
-              workspace: ws.path,
-              before,
-              after,
-            })),
-            regressionFrom: prev.task.id,
-          });
+        });
+        for (const r of regResults) {
+          results.push({ ...r, regressionFrom: prev.task.id });
         }
       }
     }

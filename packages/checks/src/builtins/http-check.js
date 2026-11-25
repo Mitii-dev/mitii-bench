@@ -9,5 +9,5 @@ export function tryCompile(item) {
 }
 
 export async function verify(check, context) {
-  return runHttpCheck(check, context.workspace);
+  return runHttpCheck(check, context.workspace, context);
 }

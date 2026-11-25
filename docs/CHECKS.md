@@ -12,14 +12,15 @@ Checks live under `checks:` in each case’s `task.yaml`. The runner compiles th
 2. [How results look](#2-how-results-look)
 3. [Agent modes and workspace policy](#3-agent-modes-and-workspace-policy)
 4. [Quick recipes](#4-quick-recipes)
-5. [Check reference](#5-check-reference)
-6. [Declarative UI](#6-declarative-ui)
-7. [HTTP and backends](#7-http-and-backends)
-8. [File and package helpers](#8-file-and-package-helpers)
-9. [Authoring patterns](#9-authoring-patterns)
-10. [Package layout (for contributors)](#10-package-layout-for-contributors)
-11. [Adding a new check type](#11-adding-a-new-check-type)
-12. [Hidden tests folder](#12-hidden-tests-folder)
+5. [Suite lifecycle (start / stop / pretest / posttest)](#5-suite-lifecycle-start--stop--pretest--posttest)
+6. [Check reference](#6-check-reference)
+7. [Declarative UI](#7-declarative-ui)
+8. [HTTP and backends](#8-http-and-backends)
+9. [File and package helpers](#9-file-and-package-helpers)
+10. [Authoring patterns](#10-authoring-patterns)
+11. [Package layout (for contributors)](#11-package-layout-for-contributors)
+12. [Adding a new check type](#12-adding-a-new-check-type)
+13. [Hidden tests folder](#13-hidden-tests-folder)
 
 ---
 
@@ -199,14 +200,45 @@ checks:
 
 No auto `workspace_changed` — ask mode will not fail just because files were untouched.
 
-### 4.5 Backend API with HTTP
+### 4.5 Backend API — shared server + tests
 
 ```yaml
 checks:
   - build: true
   - package_deps: [express, zod]
+  - pretest:
+      command: "node scripts/seed.js"
+  - start:
+      command: "node src/index.js"
+      ready:
+        path: /health
+        status: 200
+      timeoutMs: 15000
   - test:
-      command: "MITII_NO_LISTEN=1 node --test tests/api.test.js"
+      command: "node --test tests/api.test.js"
+      env:
+        BASE_URL: "{baseUrl}"
+  - http:
+      # reuses suite start — no nested start
+      requests:
+        - method: GET
+          path: /health
+          expect:
+            status: 200
+            bodyContains: ok
+  - posttest:
+      command: "node scripts/cleanup.js"
+  - stop: true
+```
+
+Tokens `{port}`, `{baseUrl}`, `{sidecarPort}` are expanded in later commands/env.  
+`PORT` and `BASE_URL` are also injected automatically while the suite server is up.  
+If you omit `stop:`, the runner still kills leftover processes at the end of the suite.
+
+### 4.5b Single-check HTTP (still supported)
+
+```yaml
+checks:
   - http:
       start:
         command: "node src/index.js"
@@ -216,7 +248,6 @@ checks:
           path: /health
           expect:
             status: 200
-            bodyContains: ok
 ```
 
 ### 4.6 Classic vitest file (still supported)
@@ -234,9 +265,62 @@ checks:
 
 ---
 
-## 5. Check reference
+## 5. Suite lifecycle (start / stop / pretest / posttest)
 
-### 5.1 Compile / shell family
+Use these when several checks need the **same long-lived process** (API server, mock upstream).
+
+| YAML | Role |
+|---|---|
+| `pretest` | One-shot setup (migrate, seed) — not long-lived |
+| `start` | Spawn server, wait until ready, keep it for later checks |
+| `test` / `http` / `command` | Run while server is up; get `{port}` / `{baseUrl}` |
+| `posttest` | One-shot teardown |
+| `stop` | Kill suite server (also auto-cleaned at end of suite) |
+
+### Ready probe
+
+```yaml
+- start:
+    command: "node src/index.js"
+    ready:
+      path: /health          # default if omitted: /health
+      status: 200
+      # or: stdoutContains: "listening"
+    timeoutMs: 15000
+    env:
+      NODE_ENV: test
+    sidecar:                 # optional second process
+      command: "node mock/upstream.js"
+      portEnv: UPSTREAM_PORT
+```
+
+### Tokens
+
+| Token / env | Meaning |
+|---|---|
+| `{port}` / `PORT` | Suite server port |
+| `{baseUrl}` / `BASE_URL` | `http://127.0.0.1:{port}` |
+| `{sidecarPort}` / `SIDECAR_PORT` | Sidecar port when used |
+
+### Report shape
+
+```text
+  ✓ pretest: echo prep -> exit 0…
+  ✓ start: ready http://127.0.0.1:52341 (port 52341)
+  ✓ test: …
+  ✓ http: GET /health -> 200
+  ✓ posttest: …
+  ✓ stop: stopped
+```
+
+`http:` without `start:` reuses the active suite server.  
+`http:` **with** its own `start:` still works as a self-contained smoke check.
+
+---
+
+## 6. Check reference
+
+### 6.1 Compile / shell family
 
 | YAML | Report label | Default command |
 |---|---|---|
@@ -278,7 +362,7 @@ checks:
 
 ---
 
-### 5.2 Workspace
+### 6.2 Workspace
 
 | YAML | Meaning |
 |---|---|
@@ -290,7 +374,7 @@ Auto-injected only for `agent.mode: agent` when you do not set either key.
 
 ---
 
-### 5.3 Files
+### 6.3 Files
 
 | YAML | Meaning |
 |---|---|
@@ -326,14 +410,55 @@ Auto-injected only for `agent.mode: agent` when you do not set either key.
 
 ---
 
-### 5.4 Packages, SQLite, workflows
+### 6.4 Packages (declared, version, installed)
+
+`package_deps` checks `package.json` (dependencies / dev / optional / peer).
+
+**Presence only (legacy form still works):**
 
 ```yaml
 - package_deps: [zod, multer]
 - package_deps:
     packages: [zod]
     file: package.json
+```
 
+**Version constraints + optional node_modules install:**
+
+```yaml
+- package_deps:
+    packages:
+      - zod                              # must be declared
+      - name: antd
+        min: "5.0.0"                     # declared version >= 5.0.0 (^5.12 ok)
+        max: "6.0.0"                     # declared version <= 6.0.0
+      - name: react
+        equals: "18.3.1"                 # numeric match (strips ^/~)
+        installed: true                  # also require node_modules/react
+    installed: false                     # default for string entries
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | Package name (scoped ok: `@scope/pkg`) |
+| `min` | Declared (and installed, if checked) version ≥ this |
+| `max` | Declared (and installed, if checked) version ≤ this |
+| `equals` | Same major.minor.patch (prefixes like `^` stripped) |
+| `installed` | Require `node_modules/<name>/package.json` |
+
+Top-level `installed: true` applies to every string entry (object entries can override).
+
+Report examples:
+
+```text
+  ✓ package_deps: ok: zod@^3.22.4, antd@^5.12.0
+  ✗ package_deps: zod: declared ^2.0.0 < min 3.0.0
+  ✗ package_deps: antd: not installed in node_modules
+```
+
+### 6.5 SQLite and workflows
+
+```yaml
 - sqlite_query:
     dbPath: data/app.db
     sql: "SELECT COUNT(*) AS n FROM users"
@@ -349,11 +474,11 @@ Auto-injected only for `agent.mode: agent` when you do not set either key.
 
 ---
 
-## 6. Declarative UI
+## 7. Declarative UI
 
 Works with **react-js** and **next-js** starters (Vitest + Testing Library; `__bench__/` is already in Vitest `include`).
 
-### 6.1 Full steps
+### 7.1 Full steps
 
 ```yaml
 - ui:
@@ -374,7 +499,7 @@ Works with **react-js** and **next-js** starters (Vitest + Testing Library; `__b
 
 `name` / `text` / `label` values written as `/pattern/flags` become RegExps.
 
-### 6.2 testIds shorthand
+### 7.2 testIds shorthand
 
 ```yaml
 - testid:
@@ -384,7 +509,7 @@ Works with **react-js** and **next-js** starters (Vitest + Testing Library; `__b
 
 Equivalent to mounting the entry and `expect: { testId }` for each id.
 
-### 6.3 What happens at runtime
+### 7.3 What happens at runtime
 
 1. Writes `__bench__/declarative-ui.test.jsx`
 2. Runs `npm test -- __bench__/declarative-ui.test.jsx`
@@ -395,7 +520,7 @@ You can still ship a classic `tests/ui.test.jsx` and use `test:` instead — bot
 
 ---
 
-## 7. HTTP and backends
+## 8. HTTP and backends
 
 ```yaml
 - http:
@@ -439,7 +564,7 @@ Single-request form still works:
 
 ---
 
-## 8. File and package helpers
+## 9. File and package helpers
 
 Prefer **behavior** (`ui`, `http`, `test`) over long `contains` piles. Use file helpers for:
 
@@ -450,7 +575,7 @@ Prefer **behavior** (`ui`, `http`, `test`) over long `contains` piles. Use file 
 
 ---
 
-## 9. Authoring patterns
+## 10. Authoring patterns
 
 ### Agent apply case (default)
 
@@ -497,7 +622,7 @@ Use **separate case folders** and the matching starter (`react-js` vs `next-js`)
 
 ---
 
-## 10. Package layout (for contributors)
+## 11. Package layout (for contributors)
 
 Checks are modular under `@mitii-bench/checks`:
 
@@ -507,16 +632,12 @@ packages/checks/src/
   compile/index.js         # YAML → internal checks (+ mode policy)
   verify/index.js          # dispatch + registerCheck()
   shared/
-    result.js
-    process.js
-    snapshot.js
+    result.js / process.js / snapshot.js
+    suite.js               # createSuiteState, startSuiteServer, tokens
   builtins/                # one module per concern
-    build.js
-    typecheck.js
-    compile-health.js      # compile: combined
-    command.js
-    test.js
-    browser.js
+    start.js / stop.js / pretest.js / posttest.js
+    build.js / typecheck.js / compile-health.js
+    command.js / test.js / browser.js
     ui-check.js / ui.js / testid.js
     exists.js / not-exists.js / contains*.js / file-match*.js
     workspace-changed.js / workspace-unchanged.js
@@ -525,7 +646,6 @@ packages/checks/src/
     package-deps.js
     workflow.js
     agent-exit.js
-    …
 ```
 
 Each builtin typically exports:
@@ -538,7 +658,7 @@ Root files like `compile.js`, `verify.js`, `ui.js` are thin compatibility shims.
 
 ---
 
-## 11. Adding a new check type
+## 12. Adding a new check type
 
 1. Add Zod shape to `CheckItemSchema` in [`packages/schema/src/task.js`](../packages/schema/src/task.js).
 2. Add `packages/checks/src/builtins/<name>.js` with `tryCompile` + `verify`.
@@ -550,7 +670,7 @@ Old cases keep working — new types are opt-in per `task.yaml`.
 
 ---
 
-## 12. Hidden tests folder
+## 13. Hidden tests folder
 
 Case-local `tests/` is copied into the workspace **only at check time** (after the agent finishes, or after dry-run applies `solution/`).
 

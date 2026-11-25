@@ -1,13 +1,16 @@
-import { resolveMitiiBin, runMitiiCli } from "@mitii-bench/adapter-mitii";
+import {
+  detectMitiiApiKeyEnv,
+  readMitiiHostConfigSummary,
+  resolveMitiiBin,
+  resolveMitiiModelLabel,
+  runMitiiCli,
+} from "@mitii-bench/adapter-mitii";
 import { loadConfig } from "./config.js";
 import { repoRoot } from "./paths.js";
 
 /**
  * Verify Mitii is reachable and configured before spending tokens on bench runs.
  * Does not call the LLM.
- *
- * Hard requirements: resolve bin + --version + setup --show.
- * doctor is advisory unless options.strict (index may be absent on the bench repo itself).
  */
 export async function runPreflight(options = {}) {
   const root = options.root ?? repoRoot();
@@ -48,23 +51,52 @@ export async function runPreflight(options = {}) {
   });
   if (!show.ok) ok = false;
 
+  const host = readMitiiHostConfigSummary(root);
+  const model = resolveMitiiModelLabel(root);
+  steps.push({
+    name: "model-config",
+    ok: Boolean(host?.model || model),
+    soft: true,
+    details: host
+      ? `${host.providerPreset ?? host.provider}:${host.model} @ ${host.baseUrl ?? "(default)"} (${host.path})`
+      : model ?? "no provider/model — run: mitii setup --provider ollama-cloud --yes --global",
+  });
+
+  const keys = detectMitiiApiKeyEnv(
+    { ...process.env, ...(config.env ?? {}) },
+    { cwd: root },
+  );
+  const needsKey =
+    !host?.providerPreset ||
+    !["ollama", "lm-studio"].includes(String(host.providerPreset));
+  steps.push({
+    name: "api-key",
+    ok: keys.ok || !needsKey,
+    soft: !strict,
+    details: keys.ok
+      ? `found ${keys.names.join(", ")} via ${keys.sources.join(", ")}`
+      : needsKey
+        ? "missing MITII_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY — for Ollama Cloud: mitii setup (pick ollama-cloud) with --global so ~/.mitii/.env is written"
+        : "local provider — no API key required",
+  });
+  if (strict && needsKey && !keys.ok) ok = false;
+
   const doctor = await runMitiiCli(["doctor"], { ...cliOpts, timeoutMs: 60000 });
-  const doctorOk = doctor.ok;
   steps.push({
     name: "doctor",
-    ok: doctorOk,
+    ok: doctor.ok,
     soft: !strict,
     details: trimOut(doctor.stdout || doctor.stderr) || `exit ${doctor.exitCode}`,
   });
-  if (strict && !doctorOk) ok = false;
+  if (strict && !doctor.ok) ok = false;
 
-  return { ok, bin, steps, strict };
+  return { ok, bin, steps, strict, model, host, apiKeys: keys };
 }
 
 function trimOut(text) {
   return String(text ?? "")
     .trim()
     .split(/\r?\n/)
-    .slice(0, 16)
+    .slice(0, 20)
     .join("\n");
 }

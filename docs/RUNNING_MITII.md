@@ -2,83 +2,101 @@
 
 Dry-run never needs Mitii. Agent runs (`pnpm bench <id>` without `--dry-run`) do.
 
-## Where is Mitii?
+## Ollama Cloud (recommended for your setup)
 
-Resolution order:
+You already ran this successfully in another repo (`wedding`). **Bench uses the global Mitii host config**, not that project’s `.mitii/`.
 
-1. `--mitii-bin=<path>` (CLI flag, when supported by the command)
-2. `MITII_BIN` or `MITII_CLI` environment variable
-3. `runner.config.local.json` → `mitiiBin` (gitignored; local only)
-4. `runner.config.json` → `mitiiBin` (committed; keep `null`)
-5. `mitii` on `PATH`
-6. Sibling `../Mitii/apps/cli/bin/mitii.js`
+### One-time global setup
 
 ```bash
-export MITII_BIN=/path/to/Mitii/apps/cli/bin/mitii.js
-# or
-export MITII_BIN=$(which mitii)
+# From any directory — write ~/.mitii/config.json + ~/.mitii/.env
+mitii setup --provider ollama-cloud --model deepseek-v4.1-flash:1017 --yes --global --test
+# Interactive alternative:
+#   mitii setup
+#   pick 2) ollama-cloud → paste key → pick model → Write → Test
+#   (add --global, or run setup from ~ so keys land in ~/.mitii/)
 ```
 
-Copy [`runner.config.example.json`](../runner.config.example.json) to `runner.config.local.json` for a personal path.
+What gets written:
 
-## Secrets and model
+| File | Contents |
+|---|---|
+| `~/.mitii/config.json` | `providerPreset: ollama-cloud`, `baseUrl: https://ollama.com/v1`, model id |
+| `~/.mitii/.env` | `MITII_API_KEY=…` (never commit) |
 
-**Never** put API keys in `runner.config.json` or `task.yaml`.
+Confirm:
 
 ```bash
-# Keys (shell / GitHub Secrets / CI env)
-export ANTHROPIC_API_KEY=…
-# or OPENAI_API_KEY / GEMINI_API_KEY / MITII_API_KEY
+mitii setup --show
+# expect: preset ollama-cloud, baseUrl https://ollama.com/v1
 
-# Non-interactive provider setup (CI-safe)
-mitii setup --provider anthropic --model claude-sonnet-4-5 --yes --global
-
-# Optional overrides
-export MITII_PROVIDER=anthropic
-export MITII_MODEL=claude-sonnet-4-5
+pnpm preflight
+# expect: ✓ model-config … ollama-cloud:…
+#         ✓ api-key … MITII_API_KEY via …/.mitii/.env
 ```
 
-## Preflight (before spending tokens)
+> **Project vs global:** `mitii setup` inside `/wedding` only configured that workspace.  
+> `pnpm bench` creates fresh workspaces under `.workspaces/` and loads **`~/.mitii`** for provider + key.
+
+## Is Mitii configured for mitii-bench?
 
 ```bash
 pnpm preflight
-# or
-pnpm --filter @mitii-bench/runner preflight -- --mitii-bin="$MITII_BIN"
 ```
 
-Checks: resolve bin → `mitii --version` → `mitii setup --show` → `mitii doctor`.
+| Check | Good |
+|---|---|
+| `resolve-bin` | Path to Mitii CLI (`runner.config.local.json` or `MITII_BIN`) |
+| `version` | e.g. `2.11.x` |
+| `setup-show` | Shows provider + model |
+| `model-config` | `ollama-cloud:<model>` @ `https://ollama.com/v1` |
+| `api-key` | `MITII_API_KEY` from `~/.mitii/.env` (or shell) |
+| `doctor` | Soft warnings OK (bench repo itself may lack an index) |
+
+## What bench invokes (aligned with latest CLI)
+
+```text
+mitii init --yes --no-index --no-gitignore   # per workspace
+mitii run --auto --cwd <workspace> --prompt-file <prompt.md>
+```
+
+Stdout/stderr stream to your terminal. Exit `124` = case `timeoutSec` hit.
+
+Ask/plan modes: `mitii ask|plan … --origin automation`.
+
+## Point bench at Mitii
+
+```bash
+cp runner.config.example.json runner.config.local.json
+# mitiiBin → /path/to/Mitii/apps/cli/bin/mitii.js
+# or:
+export MITII_BIN=/path/to/Mitii/apps/cli/bin/mitii.js
+```
+
+## Secrets
+
+**Never** put API keys in `runner.config.json` or `task.yaml`.
+
+Mitii loads (shell wins):
+
+1. `<cwd>/.env`
+2. `<cwd>/.env.local`
+3. `<cwd>/.mitii/.env`
+4. `~/.mitii/.env`
+
+Overrides: `MITII_PROVIDER`, `MITII_MODEL`, `MITII_BASE_URL`, `MITII_API_KEY`.
 
 ## Agent vs dry-run
 
-| Command | Mitii? | Needs keys? |
+| Command | Mitii? | Needs key? |
 |---|---|---|
 | `pnpm case:dry-run <id>` | No | No |
-| `pnpm bench --dryRun --tag=smoke` | No | No |
-| `pnpm bench <id>` | Yes (`--autonomy apply`) | Yes |
-| `pnpm preflight` | Yes (diagnostics only) | Keys for `doctor` |
+| `pnpm bench --dryRun …` | No | No |
+| `pnpm bench <id>` | Yes (`run --auto`) | Yes for ollama-cloud |
+| `pnpm preflight` | Diagnostics only | — |
 
-## Inspect Mitii (MCP / index)
+## Interpreting FAIL
 
-```bash
-mitii mcp list
-mitii mcp tools <serverId>
-mitii index --status
-mitii status --json
-mitii paths
-mitii setup --show
-```
-
-## GitHub Actions sketch
-
-```yaml
-env:
-  MITII_BIN: ${{ github.workspace }}/Mitii/apps/cli/bin/mitii.js
-  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-steps:
-  - run: |
-      "$MITII_BIN" setup --provider anthropic --yes --global
-      pnpm preflight
-      pnpm bench --tag=smoke
-```
-
-See [`.github/workflows/agent-nightly.example.yml`](../.github/workflows/agent-nightly.example.yml).
+- `✗ agent_exit: exit 124` — timeout; raise `timeoutSec` or use a faster cloud model
+- `✓ workspace_changed` only under `.mitii/` — agent never edited app source
+- Wrong provider (old custom `openai-compatible` gateway) — re-run `mitii setup --provider ollama-cloud --yes --global`

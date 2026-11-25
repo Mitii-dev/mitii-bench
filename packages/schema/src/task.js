@@ -159,7 +159,11 @@ const compileGrade = z.object({
 const testGrade = z.object({
   test: z.union([
     z.literal(true),
-    z.object({ command: z.string().optional(), timeoutMs: z.number().optional() }),
+    z.object({
+      command: z.string().optional(),
+      timeoutMs: z.number().optional(),
+      env: z.record(z.string()).optional(),
+    }),
   ]),
 });
 
@@ -178,6 +182,53 @@ const commandGrade = z.object({
     exitCode: z.number().optional(),
     timeoutMs: z.number().optional(),
     stdoutContains: z.string().optional(),
+    env: z.record(z.string()).optional(),
+    label: z.string().optional(),
+  }),
+});
+
+const readyProbe = z.object({
+  path: z.string().optional(),
+  status: z.number().optional(),
+  method: z.string().optional(),
+  stdoutContains: z.string().optional(),
+});
+
+const startGrade = z.object({
+  start: z.object({
+    command: z.string().min(1),
+    env: z.record(z.string()).optional(),
+    ready: readyProbe.optional(),
+    timeoutMs: z.number().optional(),
+    sidecar: z
+      .object({
+        command: z.string().min(1),
+        env: z.record(z.string()).optional(),
+        portEnv: z.string().min(1).optional(),
+      })
+      .optional(),
+  }),
+});
+
+const stopGrade = z.object({
+  stop: z.union([z.literal(true), z.object({})]),
+});
+
+const pretestGrade = z.object({
+  pretest: z.object({
+    command: z.string().min(1),
+    timeoutMs: z.number().optional(),
+    env: z.record(z.string()).optional(),
+    exitCode: z.number().optional(),
+  }),
+});
+
+const posttestGrade = z.object({
+  posttest: z.object({
+    command: z.string().min(1),
+    timeoutMs: z.number().optional(),
+    env: z.record(z.string()).optional(),
+    exitCode: z.number().optional(),
   }),
 });
 
@@ -202,10 +253,13 @@ const httpRequest = z.object({
 
 const httpGrade = z.object({
   http: z.object({
-    start: z.object({
-      command: z.string().min(1),
-      env: z.record(z.string()).optional(),
-    }),
+    /** Optional when a suite `start:` is already running. */
+    start: z
+      .object({
+        command: z.string().min(1),
+        env: z.record(z.string()).optional(),
+      })
+      .optional(),
     sidecar: z
       .object({
         command: z.string().min(1),
@@ -231,12 +285,25 @@ const sqliteGrade = z.object({
   }),
 });
 
+const packageSpec = z.union([
+  z.string().min(1),
+  z.object({
+    name: z.string().min(1),
+    min: z.string().min(1).optional(),
+    max: z.string().min(1).optional(),
+    equals: z.string().min(1).optional(),
+    installed: z.boolean().optional(),
+  }),
+]);
+
 const packageDepsGrade = z.object({
   package_deps: z.union([
-    z.array(z.string().min(1)),
+    z.array(packageSpec).min(1),
     z.object({
-      packages: z.array(z.string().min(1)).min(1),
+      packages: z.array(packageSpec).min(1),
       file: z.string().optional(),
+      /** When true, require each package under node_modules (unless overridden per package). */
+      installed: z.boolean().optional(),
     }),
   ]),
 });
@@ -266,6 +333,10 @@ export const CheckItemSchema = z.union([
   testGrade,
   browserGrade,
   commandGrade,
+  startGrade,
+  stopGrade,
+  pretestGrade,
+  posttestGrade,
   httpGrade,
   sqliteGrade,
   packageDepsGrade,

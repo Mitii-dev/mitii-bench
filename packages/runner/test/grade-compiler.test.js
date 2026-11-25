@@ -27,7 +27,7 @@ test("compiles package_deps and test", () => {
   ]);
   const pkg = checks.find((c) => c.type === "package_deps");
   assert.ok(pkg);
-  assert.deepEqual(pkg.packages, ["zod", "multer"]);
+  assert.deepEqual(pkg.packages.map((p) => p.name), ["zod", "multer"]);
   assert.ok(
     checks.some(
       (c) =>

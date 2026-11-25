@@ -8,6 +8,7 @@ export function tryCompile(item) {
   return compileShellCommand({
     command: opts.command ?? "npm test",
     timeoutMs: opts.timeoutMs ?? 120000,
+    env: opts.env,
     label: "test",
   });
 }

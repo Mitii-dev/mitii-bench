@@ -24,6 +24,10 @@ import * as sqliteQuery from "./sqlite-query.js";
 import * as workflow from "./workflow.js";
 import * as uiCheck from "./ui-check.js";
 import * as testid from "./testid.js";
+import * as start from "./start.js";
+import * as stop from "./stop.js";
+import * as pretest from "./pretest.js";
+import * as posttest from "./posttest.js";
 
 /** Compilers tried in order for each YAML check item. */
 export const compilers = [
@@ -43,6 +47,10 @@ export const compilers = [
   test,
   browser,
   command,
+  start,
+  stop,
+  pretest,
+  posttest,
   httpCheck,
   sqliteQuery,
   packageDeps,
@@ -69,6 +77,10 @@ export const verifiers = {
   [sqliteQuery.type]: sqliteQuery.verify,
   [workflow.type]: workflow.verify,
   [uiCheck.type]: uiCheck.verify,
+  [start.type]: start.verify,
+  [stop.type]: stop.verify,
+  [pretest.type]: pretest.verify,
+  [posttest.type]: posttest.verify,
 };
 
 export {

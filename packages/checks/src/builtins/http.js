@@ -1,7 +1,27 @@
 import { spawn } from "node:child_process";
-import { createServer } from "node:net";
+import { getFreePort } from "../shared/ports.js";
+import { stopChild } from "../shared/process-tree.js";
 
-export async function runHttpCheck(check, cwd) {
+/**
+ * @param {object} check
+ * @param {string} cwd
+ * @param {{ suite?: object }} [context]
+ */
+export async function runHttpCheck(check, cwd, context = {}) {
+  const suite = context.suite;
+  const useSuite = !check.start && suite?.started && suite.baseUrl;
+
+  if (!check.start && !useSuite) {
+    return {
+      passed: false,
+      details: "http check requires start: or an active suite start",
+    };
+  }
+
+  if (useSuite) {
+    return runHttpRequests(check, suite.baseUrl, check.timeoutMs ?? 15000);
+  }
+
   const port = await getFreePort();
   let sidecarPort;
   let sidecarChild;
@@ -47,93 +67,95 @@ export async function runHttpCheck(check, cwd) {
     logs += chunk;
   });
 
+  const baseUrl = `http://127.0.0.1:${port}`;
+  const timeoutMs = check.timeoutMs ?? 15000;
+
   try {
-    const baseUrl = `http://127.0.0.1:${port}`;
-    const steps = normalizeHttpSteps(check);
-    const timeoutMs = check.timeoutMs ?? 15000;
-    const summaries = [];
-    const failures = [];
-
-    for (const [index, step] of steps.entries()) {
-      const response = await requestWithRetry(baseUrl, step, timeoutMs);
-      const bodyText = await response.text();
-      let json;
-      try {
-        json = JSON.parse(bodyText);
-      } catch {
-        json = undefined;
-      }
-
-      const expect = step.expect ?? {};
-      const label = `${step.method ?? "GET"} ${step.path}`;
-      summaries.push(`${label} -> ${response.status}`);
-
-      if (expect.status !== undefined && response.status !== expect.status) {
-        failures.push(
-          `step ${index + 1} ${label}: expected status ${expect.status}, got ${response.status}`,
-        );
-      }
-      if (expect.bodyContains && !bodyText.includes(expect.bodyContains)) {
-        failures.push(
-          `step ${index + 1} ${label}: body did not contain ${JSON.stringify(expect.bodyContains)}`,
-        );
-      }
-      if (expect.jsonType && jsonType(json) !== expect.jsonType) {
-        failures.push(
-          `step ${index + 1} ${label}: expected JSON type ${expect.jsonType}, got ${jsonType(json)}`,
-        );
-      }
-      if (expect.jsonSubset && !isSubset(expect.jsonSubset, json)) {
-        failures.push(`step ${index + 1} ${label}: JSON body did not contain expected subset`);
-      }
-      if (expect.jsonEquals !== undefined) {
-        if (JSON.stringify(json) !== JSON.stringify(expect.jsonEquals)) {
-          failures.push(`step ${index + 1} ${label}: JSON body did not equal expected value`);
-        }
-      }
-      for (const path of expect.jsonPaths ?? []) {
-        if (readPath(json, path) === undefined) {
-          failures.push(`step ${index + 1} ${label}: missing JSON path ${path}`);
-        }
-      }
-      if (expect.headers && typeof expect.headers === "object") {
-        for (const [name, value] of Object.entries(expect.headers)) {
-          const actual = response.headers.get(name);
-          if (actual == null) {
-            failures.push(`step ${index + 1} ${label}: missing header ${name}`);
-          } else if (String(actual).toLowerCase() !== String(value).toLowerCase()) {
-            failures.push(
-              `step ${index + 1} ${label}: header ${name} expected ${JSON.stringify(value)}, got ${JSON.stringify(actual)}`,
-            );
-          }
-        }
-      }
-      if (expect.headerContains && typeof expect.headerContains === "object") {
-        for (const [name, value] of Object.entries(expect.headerContains)) {
-          const actual = response.headers.get(name) ?? "";
-          if (!String(actual).includes(String(value))) {
-            failures.push(
-              `step ${index + 1} ${label}: header ${name} did not contain ${JSON.stringify(value)}`,
-            );
-          }
-        }
-      }
-    }
-
-    return {
-      passed: failures.length === 0,
-      details: failures.length ? failures.join("; ") : summaries.join(" | "),
-    };
+    // Warm-up: first request retries until ready
+    return await runHttpRequests(check, baseUrl, timeoutMs);
   } catch (error) {
     return { passed: false, details: `${error.message}; server output: ${logs.slice(0, 500)}` };
   } finally {
-    terminateTree(child, "SIGTERM");
-    if (sidecarChild) terminateTree(sidecarChild, "SIGTERM");
-    setTimeout(() => {
-      terminateTree(child, "SIGKILL");
-      if (sidecarChild) terminateTree(sidecarChild, "SIGKILL");
-    }, 1000).unref();
+    stopChild(child);
+    if (sidecarChild) stopChild(sidecarChild);
   }
+}
+
+async function runHttpRequests(check, baseUrl, timeoutMs) {
+  const steps = normalizeHttpSteps(check);
+  const summaries = [];
+  const failures = [];
+
+  for (const [index, step] of steps.entries()) {
+    const response = await requestWithRetry(baseUrl, step, timeoutMs);
+    const bodyText = await response.text();
+    let json;
+    try {
+      json = JSON.parse(bodyText);
+    } catch {
+      json = undefined;
+    }
+
+    const expect = step.expect ?? {};
+    const label = `${step.method ?? "GET"} ${step.path}`;
+    summaries.push(`${label} -> ${response.status}`);
+
+    if (expect.status !== undefined && response.status !== expect.status) {
+      failures.push(
+        `step ${index + 1} ${label}: expected status ${expect.status}, got ${response.status}`,
+      );
+    }
+    if (expect.bodyContains && !bodyText.includes(expect.bodyContains)) {
+      failures.push(
+        `step ${index + 1} ${label}: body did not contain ${JSON.stringify(expect.bodyContains)}`,
+      );
+    }
+    if (expect.jsonType && jsonType(json) !== expect.jsonType) {
+      failures.push(
+        `step ${index + 1} ${label}: expected JSON type ${expect.jsonType}, got ${jsonType(json)}`,
+      );
+    }
+    if (expect.jsonSubset && !isSubset(expect.jsonSubset, json)) {
+      failures.push(`step ${index + 1} ${label}: JSON body did not contain expected subset`);
+    }
+    if (expect.jsonEquals !== undefined) {
+      if (JSON.stringify(json) !== JSON.stringify(expect.jsonEquals)) {
+        failures.push(`step ${index + 1} ${label}: JSON body did not equal expected value`);
+      }
+    }
+    for (const path of expect.jsonPaths ?? []) {
+      if (readPath(json, path) === undefined) {
+        failures.push(`step ${index + 1} ${label}: missing JSON path ${path}`);
+      }
+    }
+    if (expect.headers && typeof expect.headers === "object") {
+      for (const [name, value] of Object.entries(expect.headers)) {
+        const actual = response.headers.get(name);
+        if (actual == null) {
+          failures.push(`step ${index + 1} ${label}: missing header ${name}`);
+        } else if (String(actual).toLowerCase() !== String(value).toLowerCase()) {
+          failures.push(
+            `step ${index + 1} ${label}: header ${name} expected ${JSON.stringify(value)}, got ${JSON.stringify(actual)}`,
+          );
+        }
+      }
+    }
+    if (expect.headerContains && typeof expect.headerContains === "object") {
+      for (const [name, value] of Object.entries(expect.headerContains)) {
+        const actual = response.headers.get(name) ?? "";
+        if (!String(actual).includes(String(value))) {
+          failures.push(
+            `step ${index + 1} ${label}: header ${name} did not contain ${JSON.stringify(value)}`,
+          );
+        }
+      }
+    }
+  }
+
+  return {
+    passed: failures.length === 0,
+    details: failures.length ? failures.join("; ") : summaries.join(" | "),
+  };
 }
 
 function normalizeHttpSteps(check) {
@@ -149,15 +171,6 @@ function normalizeHttpSteps(check) {
       expect: check.expect ?? {},
     },
   ];
-}
-
-function terminateTree(child, signal) {
-  try {
-    if (process.platform !== "win32" && child.pid) process.kill(-child.pid, signal);
-    else child.kill(signal);
-  } catch {
-    // exited
-  }
 }
 
 async function requestWithRetry(baseUrl, request, timeoutMs) {
@@ -185,19 +198,6 @@ async function requestWithRetry(baseUrl, request, timeoutMs) {
   throw new Error(`server did not become ready: ${lastError?.message ?? "timeout"}`);
 }
 
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const server = createServer();
-    server.unref();
-    server.on("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      const port = typeof address === "object" && address ? address.port : null;
-      server.close(() => (port ? resolve(port) : reject(new Error("Could not allocate port"))));
-    });
-  });
-}
-
 function isSubset(expected, actual) {
   if (expected === actual) return true;
   if (!expected || !actual || typeof expected !== "object" || typeof actual !== "object") return false;
@@ -216,3 +216,5 @@ function jsonType(value) {
   if (value === null) return "null";
   return typeof value;
 }
+
+export { getFreePort };

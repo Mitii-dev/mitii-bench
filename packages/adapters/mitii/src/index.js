@@ -15,12 +15,11 @@ import { delimiter, join, resolve } from "node:path";
 
 /**
  * Invoke Mitii CLI against an isolated workspace.
- * Config lives here — not in individual task.yaml files.
  *
- * Current Mitii CLI (unattended agent edits):
- *   mitii agent --cwd <ws> --prompt-file <file> --autonomy apply --origin automation
- * Other modes:
- *   mitii <mode> --cwd <ws> --prompt-file <file> --origin automation
+ * Current unattended agent path (Mitii ≥2.11):
+ *   mitii run --auto --cwd <ws> --prompt-file <file>
+ * Fallback / ask|plan:
+ *   mitii agent|ask|plan --cwd <ws> --prompt-file <file> [--autonomy apply] --origin automation
  */
 export async function runMitiiAgent({
   workspace,
@@ -30,6 +29,9 @@ export async function runMitiiAgent({
   mitiiBin,
   env = {},
   signal,
+  stream = true,
+  initWorkspace = true,
+  invocation = "run-auto",
 }) {
   const bin = resolveMitiiBin(mitiiBin);
   if (!bin) {
@@ -49,9 +51,36 @@ export async function runMitiiAgent({
   writeFileSync(promptFile, String(prompt ?? ""), "utf8");
 
   try {
-    const args = buildMitiiArgs({ bin, workspace, promptFile, mode });
+    if (initWorkspace) {
+      const initResult = await runMitiiCli(["init", "--yes", "--no-index", "--no-gitignore"], {
+        mitiiBin: bin,
+        cwd: workspace,
+        timeoutMs: 60000,
+        env,
+        stream: false,
+      });
+      if (!initResult.ok && stream) {
+        process.stderr.write(
+          `[mitii-bench] warn: mitii init exited ${initResult.exitCode}: ${trimOneLine(initResult.stderr || initResult.stdout)}\n`,
+        );
+      }
+    }
+
+    const args = buildMitiiArgs({
+      bin,
+      workspace,
+      promptFile,
+      mode,
+      invocation,
+    });
     const command = bin.endsWith(".js") ? process.execPath : bin;
     const finalArgs = bin.endsWith(".js") ? args : args.slice(1);
+
+    if (stream) {
+      process.stderr.write(
+        `[mitii-bench] running: ${command} ${finalArgs.map(shellQuote).join(" ")}\n`,
+      );
+    }
 
     return await runProcess({
       command,
@@ -63,16 +92,41 @@ export async function runMitiiAgent({
         ...env,
       },
       signal,
+      stream,
     });
   } finally {
     rmSync(promptDir, { recursive: true, force: true });
   }
 }
 
-export function buildMitiiArgs({ bin, workspace, promptFile, mode = "agent" }) {
+/**
+ * Build argv for Mitii.
+ * @param {{ invocation?: "run-auto" | "agent" }} [opts]
+ */
+export function buildMitiiArgs({
+  bin,
+  workspace,
+  promptFile,
+  mode = "agent",
+  invocation = "run-auto",
+}) {
   const prefix = bin.endsWith(".js") ? [bin] : [];
   const verb =
     mode === "plan" || mode === "agent" || mode === "ask" ? mode : "agent";
+
+  // Preferred CI path for apply/agent benches.
+  if (verb === "agent" && invocation === "run-auto") {
+    return [
+      ...prefix,
+      "run",
+      "--auto",
+      "--cwd",
+      workspace,
+      "--prompt-file",
+      promptFile,
+    ];
+  }
+
   const args = [
     ...prefix,
     verb,
@@ -84,7 +138,6 @@ export function buildMitiiArgs({ bin, workspace, promptFile, mode = "agent" }) {
     "automation",
   ];
 
-  // Unattended edits for bench: apply autonomy (no interactive approvals).
   if (verb === "agent") {
     args.push("--autonomy", "apply");
   }
@@ -96,13 +149,11 @@ export function buildMitiiArgs({ bin, workspace, promptFile, mode = "agent" }) {
 export function isMitiiSessionLogFileName(name) {
   if (!name.endsWith(".jsonl") || name.endsWith("-model-io.jsonl")) return false;
   if (name.startsWith("cli-")) return true;
-  // Host/CLI thread logs: 10-04-2026-17-14-thread_….jsonl
   return /^\d{2}-\d{2}-\d{4}-\d{2}-\d{2}(-[AP]M)?-thread_/i.test(name);
 }
 
 /**
  * Read the latest Mitii CLI session metrics from workspace `.mitii/logs/*.jsonl`.
- * Supports legacy `session_start`/`session_end` and current `run_start`/`run_end`.
  */
 export function readMitiiSessionMetrics(workspace) {
   const logsDir = join(workspace, ".mitii", "logs");
@@ -176,7 +227,6 @@ export function readMitiiSessionMetrics(workspace) {
   };
 }
 
-/** Best-effort model label when thread logs omit provider (common in run_start). */
 export function resolveMitiiModelLabel(workspace) {
   const fromEnvProvider = process.env.MITII_PROVIDER?.trim();
   const fromEnvModel = process.env.MITII_MODEL?.trim();
@@ -184,20 +234,14 @@ export function resolveMitiiModelLabel(workspace) {
   if (fromEnvModel) return fromEnvModel;
   if (fromEnvProvider) return fromEnvProvider;
 
-  for (const path of [
-    join(workspace, ".mitii", "config.json"),
-    join(homedir(), ".mitii", "config.json"),
-  ]) {
-    if (!existsSync(path)) continue;
-    try {
-      const cfg = JSON.parse(readFileSync(path, "utf8"));
-      if (cfg.provider && cfg.model) return `${cfg.provider}:${cfg.model}`;
-      if (cfg.model) return String(cfg.model);
-      if (cfg.provider) return String(cfg.provider);
-    } catch {
-      // ignore
-    }
-  }
+  const summary = readMitiiHostConfigSummary(workspace);
+  if (!summary) return null;
+  const preset = summary.providerPreset && summary.providerPreset !== summary.provider
+    ? summary.providerPreset
+    : summary.provider;
+  if (preset && summary.model) return `${preset}:${summary.model}`;
+  if (summary.model) return String(summary.model);
+  if (preset) return String(preset);
   return null;
 }
 
@@ -215,7 +259,6 @@ export function resolveMitiiBin(configured) {
   const fromPath = findOnPath("mitii");
   if (fromPath) candidates.push(fromPath);
 
-  // Common sibling layout: ai-agents/Mitii next to ai-agents/mitii-bench
   candidates.push(resolve(process.cwd(), "../Mitii/apps/cli/bin/mitii.js"));
   candidates.push(resolve(process.cwd(), "../../Mitii/apps/cli/bin/mitii.js"));
 
@@ -244,7 +287,6 @@ function findOnPath(name) {
       }
     }
   }
-  // `which` / `where` fallback
   try {
     const cmd = process.platform === "win32" ? "where" : "which";
     const r = spawnSync(cmd, [name], { encoding: "utf8" });
@@ -261,7 +303,6 @@ function findOnPath(name) {
 
 /**
  * Run an arbitrary Mitii CLI subcommand (for preflight / diagnostics).
- * @returns {{ ok: boolean, bin: string|null, exitCode: number, stdout: string, stderr: string }}
  */
 export async function runMitiiCli(args = ["--version"], options = {}) {
   const bin = resolveMitiiBin(options.mitiiBin);
@@ -283,6 +324,7 @@ export async function runMitiiCli(args = ["--version"], options = {}) {
     cwd: options.cwd ?? process.cwd(),
     timeoutMs: options.timeoutMs ?? 60000,
     env: { CI: "1", ...(options.env ?? {}) },
+    stream: options.stream === true,
   });
   return {
     ok: result.exitCode === 0,
@@ -294,7 +336,80 @@ export async function runMitiiCli(args = ["--version"], options = {}) {
   };
 }
 
-function runProcess({ command, args, cwd, env, timeoutMs, signal }) {
+const API_KEY_NAMES = [
+  "ANTHROPIC_API_KEY",
+  "OPENAI_API_KEY",
+  "MITII_API_KEY",
+  "GEMINI_API_KEY",
+  "GOOGLE_API_KEY",
+];
+
+/**
+ * Detect whether common API key env vars are present (names only).
+ * Also checks dotenv files Mitii loads: cwd .env / .mitii/.env / ~/.mitii/.env.
+ */
+export function detectMitiiApiKeyEnv(
+  env = process.env,
+  { cwd = process.cwd(), includeGlobal = true } = {},
+) {
+  const found = new Set(
+    API_KEY_NAMES.filter((n) => Boolean(String(env[n] ?? "").trim())),
+  );
+  const sources = [];
+  if (found.size > 0) sources.push("process.env");
+
+  const files = [
+    join(cwd, ".env"),
+    join(cwd, ".env.local"),
+    join(cwd, ".mitii", ".env"),
+  ];
+  if (includeGlobal) files.push(join(homedir(), ".mitii", ".env"));
+
+  for (const file of files) {
+    if (!existsSync(file)) continue;
+    try {
+      const text = readFileSync(file, "utf8");
+      for (const name of API_KEY_NAMES) {
+        if (found.has(name)) continue;
+        const re = new RegExp(`^${name}=(\\S+)`, "m");
+        const m = text.match(re);
+        if (m && m[1] && m[1] !== '""' && m[1] !== "''") {
+          found.add(name);
+          sources.push(file);
+        }
+      }
+    } catch {
+      // ignore unreadable
+    }
+  }
+  return { ok: found.size > 0, names: [...found], sources };
+}
+
+/** Read non-secret host config summary from ~/.mitii or workspace .mitii. */
+export function readMitiiHostConfigSummary(cwd = process.cwd()) {
+  for (const path of [
+    join(cwd, ".mitii", "config.json"),
+    join(homedir(), ".mitii", "config.json"),
+  ]) {
+    if (!existsSync(path)) continue;
+    try {
+      const cfg = JSON.parse(readFileSync(path, "utf8"));
+      return {
+        path,
+        provider: cfg.provider ?? null,
+        providerPreset: cfg.providerPreset ?? null,
+        model: cfg.model ?? null,
+        baseUrl: cfg.baseUrl ?? null,
+        defaultMode: cfg.defaultMode ?? null,
+      };
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+function runProcess({ command, args, cwd, env, timeoutMs, signal, stream = false }) {
   return new Promise((resolvePromise) => {
     const startedAt = Date.now();
     const child = spawn(command, args, {
@@ -307,6 +422,11 @@ function runProcess({ command, args, cwd, env, timeoutMs, signal }) {
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
+      if (stream) {
+        process.stderr.write(
+          `\n[mitii-bench] timed out after ${timeoutMs}ms — sending SIGTERM\n`,
+        );
+      }
       child.kill("SIGTERM");
       setTimeout(() => child.kill("SIGKILL"), 2000).unref();
     }, timeoutMs);
@@ -320,10 +440,14 @@ function runProcess({ command, args, cwd, env, timeoutMs, signal }) {
     }
 
     child.stdout.on("data", (c) => {
-      stdout += c;
+      const chunk = String(c);
+      stdout += chunk;
+      if (stream) process.stdout.write(chunk);
     });
     child.stderr.on("data", (c) => {
-      stderr += c;
+      const chunk = String(c);
+      stderr += chunk;
+      if (stream) process.stderr.write(chunk);
     });
     child.on("error", (error) => {
       clearTimeout(timer);
@@ -346,4 +470,14 @@ function runProcess({ command, args, cwd, env, timeoutMs, signal }) {
       });
     });
   });
+}
+
+function shellQuote(value) {
+  const s = String(value);
+  if (/^[A-Za-z0-9_./:@+=,-]+$/.test(s)) return s;
+  return `'${s.replace(/'/g, `'\\''`)}'`;
+}
+
+function trimOneLine(text) {
+  return String(text ?? "").trim().split(/\r?\n/)[0] ?? "";
 }

@@ -1,5 +1,6 @@
 export { compileChecks, compileGrade, APPLY_AGENT_MODES } from "./compile/index.js";
 export { verifyCheck, registerCheck, getRegisteredChecks } from "./verify/index.js";
+export { runCheckSuite } from "./verify/run-suite.js";
 export { runHttpCheck, runFileMatchCheck, runUiCheck, openReadonlyDatabase } from "./builtins/index.js";
 export {
   _testOnly_generateUiTestSource,
@@ -8,3 +9,4 @@ export {
 export { runProcess } from "./shared/process.js";
 export { diffSnapshots, snapshotTree } from "./shared/snapshot.js";
 export { formatCommandCheckDetails, result } from "./shared/result.js";
+export { createSuiteState, interpolate } from "./shared/suite.js";
