@@ -17,12 +17,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "app/login/page.js"
-      text: "data-testid=\"login-view\""
+      text: 'data-testid="login-view"'
   - contains:
       file: "app/page.js"
-      text: "data-testid=\"protected-view\""
+      text: 'data-testid="protected-view"'
   - contains:
       file: "middleware.js"
       text: "middleware"

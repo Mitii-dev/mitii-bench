@@ -18,12 +18,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"stock-price\""
+      text: 'data-testid="stock-price"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"swr-validating\""
+      text: 'data-testid="swr-validating"'
   - contains:
       file: "src/App.jsx"
       text: "swr"
@@ -33,3 +36,15 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "isValidating"
+  - contains:
+      file: "src/App.jsx"
+      text: "refreshInterval"
+  - contains:
+      file: "src/App.jsx"
+      text: "revalidateOnFocus"
+  - contains:
+      file: "src/App.jsx"
+      text: "mutate()"
+  - contains:
+      file: "src/App.jsx"
+      text: "Updating..."

@@ -18,12 +18,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"trigger-toast\""
+      text: 'data-testid="trigger-toast"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"toast-list\""
+      text: 'data-testid="toast-list"'
   - contains:
       file: "src/App.jsx"
       text: "zustand"
@@ -33,3 +36,15 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "addNotification"
+  - contains:
+      file: "src/App.jsx"
+      text: "useNotificationStore"
+  - contains:
+      file: "src/App.jsx"
+      text: "notifications"
+  - contains:
+      file: "src/App.jsx"
+      text: "set("
+  - contains:
+      file: "src/App.jsx"
+      text: "removeNotification"

@@ -20,10 +20,10 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"accordion-toggle\""
+      text: 'data-testid="accordion-toggle"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"motion-panel\""
+      text: 'data-testid="motion-panel"'
   - contains:
       file: "src/App.jsx"
       text: "framer-motion"

@@ -6,4 +6,4 @@ Build a route guard for Next.js App Router that protects authenticated pages (no
 
 Prefer a middleware redirect pattern and/or a server/client check with `redirect` from `next/navigation`. Provide a minimal auth toggle (or login page) so both paths can be exercised.
 
-For `base-next-js`, implement the UI in `app/page.jsx` as a client component (`"use client"`).
+For `base-next-js`, implement the UI in `app/page.js` as a client component (`"use client"`).

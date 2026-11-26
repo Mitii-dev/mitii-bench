@@ -4,7 +4,10 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "mui"
+  - "@mui/material"
+  - "@mui/x-data-grid"
+  - "@emotion/react"
+  - "@emotion/styled"
 difficulty: "medium"
 category: "frontend"
 language: "javascript"
@@ -12,21 +15,31 @@ tags:
   - "ecosystem-lib"
   - "mui"
   - "data-grid"
+  - "pagination"
   - "react-tasks"
 timeoutSec: 300
 promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"mui-data-grid\""
+      text: 'data-testid="mui-data-grid"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"grid-search\""
+      text: 'data-testid="grid-search"'
   - contains:
       file: "src/App.jsx"
       text: "@mui/x-data-grid"
   - contains:
       file: "src/App.jsx"
       text: "DataGrid"
+  - contains:
+      file: "src/App.jsx"
+      text: "pageSizeOptions"
+  - contains:
+      file: "src/App.jsx"
+      text: "pagination"

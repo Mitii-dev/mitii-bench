@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "tanstack-table"
+  - "@tanstack/react-table@8.21.3"
 difficulty: "medium"
 category: "frontend"
 language: "javascript"
@@ -18,12 +18,12 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"sort-header-name\""
-  - contains:
-      file: "src/App.jsx"
-      text: "data-testid=\"table-row-0\""
+      text: 'data-testid="sort-header-name"'
   - contains:
       file: "src/App.jsx"
       text: "@tanstack/react-table"
@@ -33,3 +33,15 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "getSortedRowModel"
+  - contains:
+      file: "src/App.jsx"
+      text: "getCoreRowModel"
+  - contains:
+      file: "src/App.jsx"
+      text: "onSortingChange"
+  - contains:
+      file: "src/App.jsx"
+      text: "getToggleSortingHandler"
+  - contains:
+      file: "src/App.jsx"
+      text: "getIsSorted"

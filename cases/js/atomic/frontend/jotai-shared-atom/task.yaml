@@ -20,10 +20,10 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"atom-inc-btn\""
+      text: 'data-testid="atom-inc-btn"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"atom-value-display\""
+      text: 'data-testid="atom-value-display"'
   - contains:
       file: "src/App.jsx"
       text: "jotai"

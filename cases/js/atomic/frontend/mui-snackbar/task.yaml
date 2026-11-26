@@ -4,13 +4,16 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "mui"
+  - "@mui/material"
+  - "@emotion/react"
+  - "@emotion/styled"
 difficulty: "easy"
 category: "frontend"
 language: "javascript"
 tags:
   - "ecosystem-lib"
   - "mui"
+  - "snackbar"
   - "feedback"
   - "react-tasks"
 timeoutSec: 300
@@ -20,10 +23,10 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"show-alert-btn\""
+      text: 'data-testid="show-alert-btn"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"mui-snackbar\""
+      text: 'data-testid="mui-snackbar"'
   - contains:
       file: "src/App.jsx"
       text: "@mui/material"
@@ -33,3 +36,6 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "Alert"
+  - contains:
+      file: "src/App.jsx"
+      text: "autoHideDuration={3000}"

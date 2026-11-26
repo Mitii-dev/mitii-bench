@@ -4,7 +4,8 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "redux"
+  - "@reduxjs/toolkit"
+  - "react-redux"
 difficulty: "medium"
 category: "frontend"
 language: "javascript"
@@ -18,12 +19,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"cart-count\""
+      text: 'data-testid="cart-count"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"add-to-cart-btn\""
+      text: 'data-testid="add-to-cart-btn"'
   - contains:
       file: "src/App.jsx"
       text: "@reduxjs/toolkit"
@@ -33,3 +37,6 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "react-redux"
+  - contains:
+      file: "src/App.jsx"
+      text: "removeItem"

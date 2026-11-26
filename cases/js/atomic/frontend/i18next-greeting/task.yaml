@@ -5,6 +5,7 @@ starter: "react-js"
 family: "frontend"
 packages:
   - "i18next"
+  - "react-i18next"
 difficulty: "easy"
 category: "frontend"
 language: "javascript"
@@ -20,10 +21,10 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"lang-select\""
+      text: 'data-testid="lang-select"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"translated-greeting\""
+      text: 'data-testid="translated-greeting"'
   - contains:
       file: "src/App.jsx"
       text: "react-i18next"

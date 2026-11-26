@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "tanstack-query"
+  - "@tanstack/react-query"
 difficulty: "hard"
 category: "frontend"
 language: "javascript"
@@ -19,12 +19,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"comment-input\""
+      text: 'data-testid="comment-input"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"comment-submit\""
+      text: 'data-testid="comment-submit"'
   - contains:
       file: "src/App.jsx"
       text: "@tanstack/react-query"
@@ -34,3 +37,21 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "onMutate"
+  - contains:
+      file: "src/App.jsx"
+      text: "useQueryClient"
+  - contains:
+      file: "src/App.jsx"
+      text: "queryClient.cancelQueries"
+  - contains:
+      file: "src/App.jsx"
+      text: "queryClient.getQueryData"
+  - contains:
+      file: "src/App.jsx"
+      text: "queryClient.setQueryData"
+  - contains:
+      file: "src/App.jsx"
+      text: "onSuccess"
+  - contains:
+      file: "src/App.jsx"
+      text: "onError"

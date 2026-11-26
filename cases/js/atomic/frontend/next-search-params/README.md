@@ -6,7 +6,7 @@ Build a search result page using Next.js App Router `useSearchParams`.
 
 ## Starter
 
-`next-js` — Next.js App Router — implement in `app/page.jsx` as a client component (`"use client"`).
+`next-js` — Next.js App Router — implement in `app/page.js` as a client component (`"use client"`).
 
 ## Packages
 

@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "tanstack-query"
+  - "@tanstack/react-query"
 difficulty: "medium"
 category: "frontend"
 language: "javascript"
@@ -18,15 +18,18 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"rq-loading\""
+      text: 'data-testid="rq-loading"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"rq-data\""
+      text: 'data-testid="rq-data"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"rq-refetch-btn\""
+      text: 'data-testid="rq-refetch-btn"'
   - contains:
       file: "src/App.jsx"
       text: "@tanstack/react-query"
@@ -36,3 +39,15 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "QueryClientProvider"
+  - contains:
+      file: "src/App.jsx"
+      text: "queryKey"
+  - contains:
+      file: "src/App.jsx"
+      text: "queryFn"
+  - contains:
+      file: "src/App.jsx"
+      text: "refetch()"
+  - contains:
+      file: "src/App.jsx"
+      text: "jsonplaceholder.typicode.com"

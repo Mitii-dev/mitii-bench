@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "react-router"
+  - "react-router-dom"
 difficulty: "hard"
 category: "frontend"
 language: "javascript"
@@ -19,12 +19,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"login-view\""
+      text: 'data-testid="login-view"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"protected-view\""
+      text: 'data-testid="protected-view"'
   - contains:
       file: "src/App.jsx"
       text: "react-router-dom"

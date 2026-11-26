@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "react-router"
+  - "react-router-dom"
 difficulty: "easy"
 category: "frontend"
 language: "javascript"
@@ -16,23 +16,31 @@ tags:
 timeoutSec: 300
 promptFile: "prompt.md"
 readmeFile: "README.md"
+
 checks:
   - build: true
+
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"link-home\""
+      text: 'data-testid="link-home"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"link-dashboard\""
+      text: 'data-testid="link-dashboard"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"view-home\""
+      text: 'data-testid="view-home"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"view-dashboard\""
+      text: 'data-testid="view-dashboard"'
   - contains:
       file: "src/App.jsx"
       text: "react-router-dom"
+  - contains:
+      file: "src/App.jsx"
+      text: "BrowserRouter"
   - contains:
       file: "src/App.jsx"
       text: "Link"

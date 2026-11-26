@@ -6,7 +6,25 @@ import { fileURLToPath } from "node:url";
 const root = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      include: /\.[jt]sx?$/,
+    }),
+  ],
+
+  esbuild: {
+    loader: "jsx",
+    include: /\.[jt]sx?$/,
+    exclude: [/node_modules/],
+  },
+
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        ".js": "jsx",
+      },
+    },
+  },
   resolve: {
     alias: {
       "next/link": resolve(root, "./test-shims/next-link.jsx"),

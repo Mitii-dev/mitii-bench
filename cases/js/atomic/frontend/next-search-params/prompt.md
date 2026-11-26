@@ -5,4 +5,4 @@ Build a search result page using Next.js App Router `useSearchParams`.
 
 Use `next/navigation` `useSearchParams` (and `useRouter` / `usePathname` as needed) in a client component. Wrap with a Suspense boundary if required by Next.
 
-For `base-next-js`, implement the UI in `app/page.jsx` as a client component (`"use client"`).
+For `base-next-js`, implement the UI in `app/page.js` as a client component (`"use client"`).
