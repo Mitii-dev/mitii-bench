@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "headlessui"
+  - "@headlessui/react"
 difficulty: "easy"
 category: "frontend"
 language: "javascript"
@@ -21,10 +21,10 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"headless-menu-btn\""
+      text: 'data-testid="headless-menu-btn"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"headless-menu-items\""
+      text: 'data-testid="headless-menu-items"'
   - contains:
       file: "src/App.jsx"
       text: "@headlessui/react"

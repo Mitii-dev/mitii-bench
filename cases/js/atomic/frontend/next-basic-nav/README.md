@@ -6,7 +6,7 @@ Build a navigation bar using Next.js App Router `Link` and route segments (no re
 
 ## Starter
 
-`next-js` — Next.js App Router — implement in `app/page.jsx` as a client component (`"use client"`).
+`next-js` — Next.js App Router — implement in `app/page.js` as a client component (`"use client"`).
 
 ## Packages
 

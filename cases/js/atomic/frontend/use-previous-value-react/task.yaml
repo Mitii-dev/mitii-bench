@@ -1,0 +1,43 @@
+id: "frontend-use-previous-value-react"
+title: "React Previous Value Hook"
+ecosystem: js
+starter: react-js
+family: frontend
+packages: []
+difficulty: hard
+category: frontend
+language: javascript
+tags:
+  - "react"
+  - "custom-hooks"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: prompt.md
+readmeFile: README.md
+
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - exists:
+      file: "src/App.jsx"
+  - contains:
+      file: "src/App.jsx"
+      text: "export function usePrevious"
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="current-value"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="previous-value"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="increment-button"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="decrement-button"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="reset-button"'

@@ -22,7 +22,7 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"zip-input\""
+      text: 'data-testid="zip-input"'
   - contains:
       file: "src/App.jsx"
       text: "formik"
@@ -32,3 +32,6 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "Formik"
+  - contains:
+      file: "src/App.jsx"
+      text: "validateOnBlur"

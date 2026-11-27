@@ -4,7 +4,8 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "redux"
+  - "@reduxjs/toolkit"
+  - "react-redux"
 difficulty: "hard"
 category: "frontend"
 language: "javascript"
@@ -19,12 +20,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"thunk-status\""
+      text: 'data-testid="thunk-status"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"thunk-data-list\""
+      text: 'data-testid="thunk-data-list"'
   - contains:
       file: "src/App.jsx"
       text: "@reduxjs/toolkit"

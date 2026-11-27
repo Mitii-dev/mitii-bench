@@ -6,6 +6,7 @@ family: "frontend"
 packages:
   - "react-hook-form"
   - "zod"
+  - "@hookform/resolvers"
 difficulty: "hard"
 category: "frontend"
 language: "javascript"
@@ -20,9 +21,12 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"zod-error-list\""
+      text: 'data-testid="zod-error-list"'
   - contains:
       file: "src/App.jsx"
       text: "react-hook-form"
@@ -32,3 +36,15 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "zodResolver"
+  - contains:
+      file: "src/App.jsx"
+      text: "z.coerce.number"
+  - contains:
+      file: "src/App.jsx"
+      text: "zodResolver(profileSchema)"
+  - contains:
+      file: "src/App.jsx"
+      text: ".email("
+  - contains:
+      file: "src/App.jsx"
+      text: ".min(18"

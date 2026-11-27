@@ -1,0 +1,29 @@
+id: "frontend-overlay-system-react"
+title: "Overlay System"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="overlay-system"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="overlay-portal-root"'
+  - contains:
+      file: "src/App.jsx"
+      text: "createPortal"

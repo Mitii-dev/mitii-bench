@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "radix"
+  - "@radix-ui/react-dialog"
 difficulty: "medium"
 category: "frontend"
 language: "javascript"
@@ -20,18 +20,30 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"dialog-trigger\""
+      text: 'data-testid="dialog-trigger"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"dialog-content\""
+      text: 'data-testid="dialog-content"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"dialog-close\""
+      text: 'data-testid="dialog-close"'
   - contains:
       file: "src/App.jsx"
       text: "@radix-ui/react-dialog"
   - contains:
       file: "src/App.jsx"
       text: "Dialog"
+  - contains:
+      file: "src/App.jsx"
+      text: "Dialog.Title"
+  - contains:
+      file: "src/App.jsx"
+      text: "Dialog.Description"
+  - contains:
+      file: "src/App.jsx"
+      text: "Dialog.Portal"

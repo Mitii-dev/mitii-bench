@@ -18,12 +18,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"input-username\""
+      text: 'data-testid="input-username"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"input-password\""
+      text: 'data-testid="input-password"'
   - contains:
       file: "src/App.jsx"
       text: "react-hook-form"
@@ -33,3 +36,15 @@ checks:
   - contains:
       file: "src/App.jsx"
       text: "register"
+  - contains:
+      file: "src/App.jsx"
+      text: "required:"
+  - contains:
+      file: "src/App.jsx"
+      text: "minLength:"
+  - contains:
+      file: "src/App.jsx"
+      text: "errors.username"
+  - contains:
+      file: "src/App.jsx"
+      text: "errors.password"

@@ -1,0 +1,41 @@
+id: "command-palette-react"
+title: "Searchable Command Palette with Keyboard Navigation"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "command-palette"
+  - "keyboard-navigation"
+  - "search"
+  - "accessibility"
+  - "react"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="command-palette-trigger"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="command-palette-search"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="command-palette-options"'
+  - contains:
+      file: "src/App.jsx"
+      text: "ArrowDown"
+  - contains:
+      file: "src/App.jsx"
+      text: "ArrowUp"
+  - contains:
+      file: "src/App.jsx"
+      text: "Escape"

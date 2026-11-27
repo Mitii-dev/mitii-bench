@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "helmet"
+  - "react-helmet-async"
 difficulty: "easy"
 category: "frontend"
 language: "javascript"
@@ -20,10 +20,10 @@ checks:
   - build: true
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"seo-title-input\""
+      text: 'data-testid="seo-title-input"'
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"seo-description-input\""
+      text: 'data-testid="seo-description-input"'
   - contains:
       file: "src/App.jsx"
       text: "react-helmet-async"

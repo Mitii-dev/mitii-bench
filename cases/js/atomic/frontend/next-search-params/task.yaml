@@ -17,15 +17,26 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "app/page.js"
-      text: "data-testid=\"query-input\""
+      text: 'data-testid="query-input"'
   - contains:
       file: "app/page.js"
-      text: "data-testid=\"search-results\""
+      text: 'data-testid="search-results"'
   - contains:
       file: "app/page.js"
       text: "useSearchParams"
   - contains:
       file: "app/page.js"
       text: "next/navigation"
+  - exists:
+      file: "app/page.js"
+  - contains:
+      file: "app/page.js"
+      text: "Suspense"
+  - contains:
+      file: "app/page.js"
+      text: "router.replace"

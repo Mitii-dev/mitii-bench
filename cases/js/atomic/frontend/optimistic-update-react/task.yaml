@@ -1,0 +1,39 @@
+id: "optimistic-update-react"
+title: "Optimistic UI Updates with Rollback on API Failure"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "optimistic-update"
+  - "api"
+  - "rollback"
+  - "async-state"
+  - "error-handling"
+  - "react"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="fail-next-request"'
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid={`task-status-${task.id}`}"
+  - contains:
+      file: "src/App.jsx"
+      text: "data-testid={`task-retry-${task.id}`}"
+  - contains:
+      file: "src/App.jsx"
+      text: "catch (error)"
+  - contains:
+      file: "src/App.jsx"
+      text: "setTasks"

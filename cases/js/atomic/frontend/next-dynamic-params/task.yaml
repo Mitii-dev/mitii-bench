@@ -17,9 +17,12 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "app/products/[id]/page.js"
-      text: "data-testid=\"product-detail\""
+      text: 'data-testid="product-detail"'
   - contains:
       file: "app/products/[id]/page.js"
       text: "useParams"
@@ -31,3 +34,10 @@ checks:
       text: "[id]"
   - exists:
       file: "app/products/[id]/page.js"
+  - exists:
+      file: "app/page.js"
+  - exists:
+      file: "tests/ui.test.jsx"
+  - contains:
+      file: "app/page.js"
+      text: "/products/42"

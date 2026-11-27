@@ -6,7 +6,7 @@ Build a product detail page using Next.js App Router dynamic segments and `usePa
 
 ## Starter
 
-`next-js` — Next.js App Router — implement in `app/page.jsx` as a client component (`"use client"`).
+`next-js` — Next.js App Router — implement in `app/page.js` as a client component (`"use client"`).
 
 ## Packages
 

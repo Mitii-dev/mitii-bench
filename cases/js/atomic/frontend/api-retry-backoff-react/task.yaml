@@ -1,0 +1,46 @@
+id: "frontend-api-retry-backoff-react"
+title: "API Retry with Exponential Backoff"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "api"
+  - "retry"
+  - "exponential-backoff"
+  - "async"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="retry-app"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="start-request"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="request-status"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="attempt-count"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="retry-count"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="next-delay"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="request-result"'

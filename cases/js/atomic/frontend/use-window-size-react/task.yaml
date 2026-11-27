@@ -1,0 +1,26 @@
+id: "frontend-use-window-size-react"
+title: "Window Size Hook"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+  - test:
+      command: "npx vitest run tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="window-size"'
+  - contains:
+      file: "src/App.jsx"
+      text: "removeEventListener"

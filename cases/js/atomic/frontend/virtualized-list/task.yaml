@@ -4,7 +4,7 @@ ecosystem: "js"
 starter: "react-js"
 family: "frontend"
 packages:
-  - "react-window"
+  - "react-window@1.8.10"
 difficulty: "hard"
 category: "frontend"
 language: "javascript"
@@ -18,15 +18,15 @@ promptFile: "prompt.md"
 readmeFile: "README.md"
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "src/App.jsx"
-      text: "data-testid=\"virtual-list\""
+      text: 'data-testid="virtual-list"'
   - contains:
       file: "src/App.jsx"
       text: "react-window"
   - contains:
       file: "src/App.jsx"
       text: "FixedSizeList"
-  - contains:
-      file: "src/App.jsx"
-      text: "VariableSizeList"

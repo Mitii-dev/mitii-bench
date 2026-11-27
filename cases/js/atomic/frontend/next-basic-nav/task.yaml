@@ -16,25 +16,30 @@ tags:
 timeoutSec: 300
 promptFile: "prompt.md"
 readmeFile: "README.md"
+
 checks:
   - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
   - contains:
       file: "components/Nav.js"
-      text: "data-testid=\"link-home\""
+      text: 'data-testid="link-home"'
   - contains:
       file: "components/Nav.js"
-      text: "data-testid=\"link-dashboard\""
-  - contains:
-      file: "app/page.js"
-      text: "data-testid=\"view-home\""
-  - contains:
-      file: "app/dashboard/page.js"
-      text: "data-testid=\"view-dashboard\""
+      text: 'data-testid="link-dashboard"'
   - contains:
       file: "components/Nav.js"
       text: "next/link"
   - contains:
+      file: "app/page.js"
+      text: 'data-testid="view-home"'
+  - contains:
+      file: "app/dashboard/page.js"
+      text: 'data-testid="view-dashboard"'
+  - exists:
       file: "components/Nav.js"
-      text: "Link"
+  - exists:
+      file: "app/page.js"
   - exists:
       file: "app/dashboard/page.js"

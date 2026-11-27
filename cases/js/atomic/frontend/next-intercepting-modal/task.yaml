@@ -1,0 +1,26 @@
+id: "frontend-next-intercepting-modal"
+title: "Next.js Intercepting Route Modal"
+ecosystem: "js"
+starter: "next-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - exists:
+      file: "app/@modal/(.)photos/[id]/page.js"
+  - exists:
+      file: "app/photos/[id]/page.js"
+  - exists:
+      file: "app/@modal/default.js"

@@ -1,0 +1,24 @@
+id: frontend-dependent-select-fields-react
+title: "Country, State, and City Dependent Selects"
+ecosystem: js
+starter: react-js
+family: frontend
+difficulty: medium
+category: frontend
+tags: [vanilla]
+timeoutSec: 300
+promptFile: prompt.md
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: src/App.jsx
+      text: 'data-testid="country-select"'
+  - contains:
+      file: src/App.jsx
+      text: 'data-testid="state-select"'
+  - contains:
+      file: src/App.jsx
+      text: 'data-testid="city-select"'
