@@ -1,0 +1,45 @@
+id: "frontend-drag-drop-list-react"
+title: "Drag and Drop List Reordering"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+
+tags:
+  - "react"
+  - "drag-and-drop"
+  - "list-reordering"
+  - "state-management"
+  - "react-tasks"
+  - "vanilla"
+
+timeoutSec: 300
+
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="task-list"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="draggable-item"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: "onDragStart"
+
+  - contains:
+      file: "src/App.jsx"
+      text: "onDrop"

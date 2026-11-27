@@ -1,0 +1,36 @@
+id: "focus-trap-dialog-react"
+title: "Focus Trap Dialog: Keyboard Focus Management"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages:
+  - "focus-trap-react"
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "ecosystem-lib"
+  - "focus-trap-react"
+  - "accessibility"
+  - "keyboard-navigation"
+  - "react-tasks"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: "focus-trap-react"
+  - contains:
+      file: "src/App.jsx"
+      text: "FocusTrap"
+  - contains:
+      file: "src/App.jsx"
+      text: "aria-modal"
+  - contains:
+      file: "src/App.jsx"
+      text: "aria-labelledby"

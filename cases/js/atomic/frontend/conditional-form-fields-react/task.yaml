@@ -1,0 +1,33 @@
+id: "frontend-conditional-form-fields-react"
+title: "Conditional Form Fields"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "forms"
+  - "conditional-rendering"
+  - "form-validation"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="account-type"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="business-fields"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="submit-btn"'

@@ -1,0 +1,29 @@
+id: frontend-use-undo-redo-react
+title: "Custom Undo/Redo State Hook"
+ecosystem: js
+starter: react-js
+family: frontend
+packages: []
+difficulty: medium
+category: frontend
+language: javascript
+tags:
+  - vanilla
+timeoutSec: 300
+promptFile: prompt.md
+readmeFile: README.md
+
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: src/App.jsx
+      text: "useUndoRedo"
+  - contains:
+      file: src/App.jsx
+      text: 'data-testid="undo-button"'
+  - contains:
+      file: src/App.jsx
+      text: 'data-testid="redo-button"'

@@ -1,0 +1,33 @@
+id: "frontend-websocket-live-updates-react"
+title: "WebSocket Live Updates Dashboard"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "hard"
+category: "frontend"
+language: "javascript"
+tags:
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="connection-status"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="metrics-list"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="alerts-list"'

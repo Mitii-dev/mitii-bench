@@ -1,0 +1,49 @@
+id: "frontend-form-dirty-state-react"
+title: "Form Dirty State"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="dirty-indicator"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="save-button"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="reset-button"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="navigation-link"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="name-input"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="email-input"'
+
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="message-input"'

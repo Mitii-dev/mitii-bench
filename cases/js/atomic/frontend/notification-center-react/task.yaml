@@ -1,0 +1,29 @@
+id: "frontend-notification-center-react"
+title: "Notification Center"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+  - test:
+      command: "npm test -- tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="notification-center"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="notification-list"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="unread-count"'

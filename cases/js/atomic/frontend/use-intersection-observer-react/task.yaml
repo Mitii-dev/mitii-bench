@@ -1,0 +1,38 @@
+id: "frontend-use-intersection-observer-react"
+title: "Intersection Observer Hook"
+ecosystem: "js"
+starter: "react-js"
+family: "frontend"
+packages: []
+difficulty: "medium"
+category: "frontend"
+language: "javascript"
+tags:
+  - "react"
+  - "custom-hooks"
+  - "react-tasks"
+  - "vanilla"
+timeoutSec: 300
+promptFile: "prompt.md"
+readmeFile: "README.md"
+
+checks:
+  - build: true
+  - test:
+      command: "npx vitest run tests/ui.test.jsx"
+      timeoutMs: 60000
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="observed-element"'
+  - contains:
+      file: "src/App.jsx"
+      text: 'data-testid="intersection-status"'
+  - contains:
+      file: "src/App.jsx"
+      text: "new IntersectionObserver"
+  - contains:
+      file: "src/App.jsx"
+      text: ".observe("
+  - contains:
+      file: "src/App.jsx"
+      text: ".disconnect("
